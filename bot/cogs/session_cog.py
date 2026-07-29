@@ -23,13 +23,19 @@ class SessionCog(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="create", description="Create a new game session")
-    @app_commands.describe(mode="Game mode: campaign, standalone, or local")
+    @app_commands.describe(mode="Game mode: campaign, standalone, or local", game="Which game to play")
     @app_commands.choices(mode=[
         app_commands.Choice(name="Campaign — Full season with eliminations", value="campaign"),
         app_commands.Choice(name="Standalone — Play a single game", value="standalone"),
         app_commands.Choice(name="Local — Private play, no tracking", value="local"),
     ])
-    async def create(self, interaction: discord.Interaction, mode: str):
+    @app_commands.choices(game=[
+        app_commands.Choice(name="Majority Rules", value="majority_rules"),
+        app_commands.Choice(name="One Night Mafia", value="one_night_mafia"),
+        app_commands.Choice(name="Trivia Challenge", value="trivia"),
+        app_commands.Choice(name="The Trust Game", value="trust"),
+    ])
+    async def create(self, interaction: discord.Interaction, mode: str, game: str):
         existing = session_manager.get_session_by_channel(interaction.channel_id)
         if existing:
             await interaction.response.send_message(
@@ -48,10 +54,11 @@ class SessionCog(commands.Cog):
             host_id=interaction.user.id,
             mode=game_mode,
         )
+        session.game_type = game
 
         embed = discord.Embed(
             title="Session Created",
-            description=f"**Mode:** {game_mode.value.title()}\n**Host:** {interaction.user.mention}\n**Players:** 0/{session.min_players}",
+            description=f"**Game:** {game.replace('_', ' ').title()}\n**Mode:** {game_mode.value.title()}\n**Host:** {interaction.user.mention}\n**Players:** 0/{session.min_players}",
             color=BLUE_PRIMARY,
         )
         embed.add_field(name="Session ID", value=session.id, inline=False)

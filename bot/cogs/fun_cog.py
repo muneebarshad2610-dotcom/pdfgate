@@ -96,10 +96,11 @@ class FunCog(commands.GroupCog, group_name="fun"):
     @app_commands.describe(thing="The thing to rate")
     async def rate(self, interaction: discord.Interaction, thing: str):
         score = random.randint(1, 10)
-        bar = "🟦" * score + "⬛" * (10 - score)
+        filled = "<:205150heart951:1531870116587900928>" * score
+        empty = "<:73190blueasterisk:1531870110896226344>" * (10 - score)
         embed = discord.Embed(
             title="Rating",
-            description=f"I rate **{thing}** a **{score}/10**\n{bar}",
+            description=f"I rate **{thing}** a **{score}/10**\n{filled}{empty}",
             color=BLUE_PRIMARY,
         )
         await interaction.response.send_message(embed=embed)

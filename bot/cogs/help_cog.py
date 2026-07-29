@@ -22,7 +22,7 @@ class HelpCog(commands.Cog):
         page1.add_field(
             name="Session Commands",
             value=(
-                "`/create [mode]` — Create a new game session\n"
+                "`/create [mode] [game]` — Create a new game session\n"
                 "`/join` — Join the active session\n"
                 "`/leave` — Leave the current session\n"
                 "`/start` — Start the game (host only)\n"
