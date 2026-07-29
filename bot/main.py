@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 
+import discord
 from aiohttp import web
 from discord import Intents, Activity, ActivityType
 from discord.ext import commands
