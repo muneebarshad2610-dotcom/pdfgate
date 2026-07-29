@@ -60,8 +60,34 @@ class HelpCog(commands.Cog):
         )
 
         embed.add_field(
+            name="Fun Commands",
+            value=(
+                "`/fun roll [sides]` — Roll a dice\n"
+                "`/fun flip` — Flip a coin\n"
+                "`/fun choose <options>` — Pick from a list\n"
+                "`/fun random <min> <max>` — Random number\n"
+                "`/fun avatar [user]` — Get avatar"
+            ),
+            inline=False,
+        )
+
+        embed.add_field(
+            name="Dev & Test Commands",
+            value=(
+                "`/dev echo <text>` — Echo a message\n"
+                "`/dev permissions` — Check your perms\n"
+                "`/dev user_info [user]` — User details\n"
+                "`/dev server_info` — Server details\n"
+                "`/test embed` — Test embed formatting\n"
+                "`/test fill` — Fill session with test players\n"
+                "`/test question <game>` — Show a random question"
+            ),
+            inline=False,
+        )
+
+        embed.add_field(
             name="Admin Commands",
-            value="`/ping` — Check bot latency\n`/sync` — Sync slash commands",
+            value="`/ping` — Check bot latency\n`/sync [dev/global]` — Sync slash commands\n`/force_end` — End all sessions",
             inline=False,
         )
 

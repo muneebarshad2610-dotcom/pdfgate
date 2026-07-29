@@ -42,6 +42,9 @@ class HouseOfGamesBot(commands.Bot):
             "bot.cogs.game_cog",
             "bot.cogs.admin_cog",
             "bot.cogs.help_cog",
+            "bot.cogs.dev_cog",
+            "bot.cogs.test_cog",
+            "bot.cogs.fun_cog",
         ]
         for cog in cogs:
             try:

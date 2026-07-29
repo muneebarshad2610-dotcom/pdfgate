@@ -18,16 +18,29 @@ class AdminCog(commands.Cog):
         latency = round(self.bot.latency * 1000)
         await interaction.response.send_message(f"Pong! Latency: {latency}ms")
 
-    @app_commands.command(name="sync", description="Sync slash commands globally (admin only)")
-    async def sync(self, interaction: discord.Interaction):
+    @app_commands.command(name="sync", description="Sync slash commands (admin only)")
+    @app_commands.describe(scope="'dev' to sync to dev guild, 'global' for all servers (slow)")
+    @app_commands.choices(scope=[
+        app_commands.Choice(name="dev — Development guild only (fast)", value="dev"),
+        app_commands.Choice(name="global — All servers (slow, can take hours)", value="global"),
+    ])
+    async def sync(self, interaction: discord.Interaction, scope: str = "dev"):
         if not self._is_admin(interaction.user.id):
             await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
             return
 
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         try:
-            synced = await self.bot.tree.sync()
-            await interaction.followup.send(f"Synced {len(synced)} commands globally.")
+            if scope == "dev":
+                DEV_GUILD_ID = 1522345099181297704
+                guild = self.bot.get_guild(DEV_GUILD_ID) or await self.bot.fetch_guild(DEV_GUILD_ID)
+                self.bot.tree.copy_global_to(guild=guild)
+                synced = await self.bot.tree.sync(guild=guild)
+                msg = f"Synced {len(synced)} commands to dev guild."
+            else:
+                synced = await self.bot.tree.sync()
+                msg = f"Synced {len(synced)} commands globally."
+            await interaction.followup.send(msg)
         except Exception as e:
             await interaction.followup.send(f"Failed to sync commands: {e}")
 
