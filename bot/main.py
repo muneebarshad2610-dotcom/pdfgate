@@ -34,7 +34,11 @@ class HouseOfGamesBot(commands.Bot):
     async def setup_hook(self):
         await self._load_cogs()
         await init_db()
-        log.info("Bot setup complete — cogs loaded, database initialized")
+        DEV_GUILD_ID = 1522345099181297704
+        guild = discord.Object(id=DEV_GUILD_ID)
+        self.tree.copy_global_to(guild=guild)
+        await self.tree.sync(guild=guild)
+        log.info("Bot setup complete — cogs loaded, database initialized, dev guild synced")
 
     async def _load_cogs(self):
         cogs = [
@@ -56,6 +60,13 @@ class HouseOfGamesBot(commands.Bot):
     async def on_ready(self):
         log.info("Logged in as %s (ID: %s)", self.user, self.user.id)
         log.info("Connected to %d guilds", len(self.guilds))
+        if not hasattr(self, "_synced_global"):
+            try:
+                synced = await self.tree.sync()
+                log.info("Globally synced %d commands", len(synced))
+            except Exception as e:
+                log.warning("Global sync failed (run /sync global manually): %s", e)
+            self._synced_global = True
 
 
 LANDING_PAGE: str | None = None

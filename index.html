@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>House of Games — Discord Bot</title>
   <meta name="description" content="Competitive multiplayer game shows for your Discord server. Four shows. Ten players. One winner.">
-
   <meta property="og:title" content="House of Games — Discord Bot">
   <meta property="og:description" content="Competitive multiplayer game shows for your Discord. Four shows. Ten players. One winner.">
   <meta property="og:type" content="website">
@@ -13,151 +12,222 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@700,600,500&display=swap" rel="stylesheet">
 
   <style>
-    /* ===== RESET ===== */
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
-    body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0A0B12;color:#F7F3EB;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-    img{max-width:100%;display:block}
+    body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:#050505;color:#F7F3EB;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
     a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
     ul{list-style:none}
 
-    /* ===== KEYBOARD FOCUS ===== */
-    :focus-visible{outline:2px solid #FFD84D;outline-offset:3px;border-radius:4px}
+    :focus-visible{outline:2px solid #FFD84D;outline-offset:4px;border-radius:6px}
 
-    /* ===== CONTAINER ===== */
-    .container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+    .container{max-width:1200px;margin:0 auto;padding:0 2rem}
+    @media(max-width:768px){.container{padding:0 1.25rem}}
 
-    /* ===== HEADER ===== */
-    .header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 0;background:rgba(10,11,18,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid rgba(247,243,235,.06)}
-    .header .container{display:flex;align-items:center;justify-content:space-between}
-    .header-logo{font-family:Barlow,sans-serif;font-weight:700;font-size:1.125rem;letter-spacing:.15em;color:#F7F3EB}
-    .header-logo span{color:#FFD84D}
-    .header-cta{font-size:.8125rem;font-weight:600;padding:.55rem 1.25rem;border-radius:100px;background:#FFD84D;color:#0A0B12;transition:opacity .25s,transform .25s}
-    .header-cta:hover{opacity:.85;transform:translateY(-1px)}
-    @media(max-width:480px){.header-cta{padding:.45rem 1rem;font-size:.75rem}}
+    /* ===== NOISE OVERLAY ===== */
+    .noise{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px}
 
-    /* ===== BUTTON ===== */
-    .btn{display:inline-block;font-family:Inter,sans-serif;font-weight:600;border:none;cursor:pointer;transition:opacity .25s,transform .25s,box-shadow .25s;text-align:center}
-    .btn:hover{opacity:.85;transform:translateY(-2px)}
-    .btn--primary{background:#FFD84D;color:#0A0B12;padding:.85rem 2.25rem;border-radius:100px;font-size:1rem;box-shadow:0 0 30px rgba(255,216,77,.15)}
-    .btn--primary:hover{box-shadow:0 0 50px rgba(255,216,77,.25)}
+    /* ===== BACKGROUND ORBS ===== */
+    .bg-orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;will-change:transform;z-index:0}
+    .bg-orb--1{width:70vmax;height:70vmax;top:-15%;left:-10%;background:radial-gradient(circle,rgba(120,80,255,0.12) 0%,transparent 70%);animation:drift 30s cubic-bezier(0.32,0.72,0,1) infinite}
+    .bg-orb--2{width:55vmax;height:55vmax;bottom:-10%;right:-5%;background:radial-gradient(circle,rgba(0,201,167,0.08) 0%,transparent 70%);animation:drift 36s cubic-bezier(0.32,0.72,0,1) infinite reverse}
+    .bg-orb--3{width:40vmax;height:40vmax;top:40%;left:55%;background:radial-gradient(circle,rgba(255,216,77,0.05) 0%,transparent 70%);animation:drift 28s cubic-bezier(0.32,0.72,0,1) infinite 5s}
+
+    @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(6%,-8%) scale(1.05)}50%{transform:translate(-4%,4%) scale(0.95)}75%{transform:translate(8%,-3%) scale(1.02)}}
+
+    @media(prefers-reduced-motion:reduce){.bg-orb,.noise,.nav-overlay,.nav-link,.reveal,.btn-inner-icon,.hamburger-line,.hero-eyebrow{animation:none!important;transition:none!important}}
+
+    /* ===== FLUID ISLAND NAV ===== */
+    .nav{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:100;width:90%;max-width:720px}
+    .nav-bar{display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.625rem 0.625rem 2rem;background:rgba(5,5,5,0.72);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,0.06);border-radius:100px;transition:border-color 0.6s cubic-bezier(0.32,0.72,0,1)}
+    .nav-bar:hover{border-color:rgba(255,255,255,0.12)}
+    .nav-logo{font-family:'Clash Display',sans-serif;font-weight:600;font-size:1rem;letter-spacing:0.18em;color:#F7F3EB}
+    .nav-logo em{font-style:normal;color:#FFD84D}
+    .nav-actions{display:flex;align-items:center;gap:0.75rem}
+    .nav-cta{font-size:0.8125rem;font-weight:600;padding:0.5rem 1.25rem;border-radius:100px;background:#FFD84D;color:#050505;transition:all 0.5s cubic-bezier(0.32,0.72,0,1);cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif}
+    .nav-cta:hover{opacity:0.85;transform:scale(0.97)}
+
+    .hamburger{width:2.5rem;height:2.5rem;border-radius:50%;border:none;background:rgba(255,255,255,0.06);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;position:relative;transition:background 0.4s cubic-bezier(0.32,0.72,0,1)}
+    .hamburger:hover{background:rgba(255,255,255,0.1)}
+    .hamburger-line{display:block;width:18px;height:1.5px;background:#F7F3EB;border-radius:2px;transition:all 0.5s cubic-bezier(0.32,0.72,0,1);transform-origin:center;position:absolute}
+    .hamburger-line:nth-child(1){transform:translateY(-5px)}
+    .hamburger-line:nth-child(2){transform:translateY(5px);width:12px;align-self:flex-end}
+    .hamburger.active .hamburger-line:nth-child(1){transform:rotate(45deg)}
+    .hamburger.active .hamburger-line:nth-child(2){transform:rotate(-45deg);width:18px}
+
+    .nav-overlay{position:fixed;inset:0;z-index:99;background:rgba(5,5,5,0.88);backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.7s cubic-bezier(0.32,0.72,0,1)}
+    .nav-overlay.open{opacity:1;pointer-events:all}
+    .nav-overlay-inner{display:flex;flex-direction:column;align-items:center;gap:2.5rem}
+    .nav-link{font-family:'Clash Display',sans-serif;font-weight:500;font-size:clamp(2rem,5vw,4rem);color:rgba(247,243,235,0.5);letter-spacing:-0.02em;transition:all 0.5s cubic-bezier(0.32,0.72,0,1);opacity:0;transform:translateY(2rem)}
+    .nav-overlay.open .nav-link{opacity:1;transform:translateY(0)}
+    .nav-overlay.open .nav-link:nth-child(1){transition-delay:0.1s}
+    .nav-overlay.open .nav-link:nth-child(2){transition-delay:0.18s}
+    .nav-overlay.open .nav-link:nth-child(3){transition-delay:0.26s}
+    .nav-overlay.open .nav-link:nth-child(4){transition-delay:0.34s}
+    .nav-overlay.open .nav-link:nth-child(5){transition-delay:0.42s}
+    .nav-link:hover{color:#F7F3EB}
+
+    /* ===== BUTTON ARCHITECTURE ===== */
+    .btn{display:inline-flex;align-items:center;gap:0.75rem;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;border:none;cursor:pointer;transition:all 0.5s cubic-bezier(0.32,0.72,0,1);text-align:center;position:relative}
+    .btn--primary{background:#FFD84D;color:#050505;padding:0.875rem 2.25rem;border-radius:100px;font-size:1rem}
+    .btn--primary:active{transform:scale(0.97)}
     .btn--large{padding:1.1rem 3rem;font-size:1.125rem}
 
+    /* Button-in-Button trailing icon */
+    .btn-icon-wrap{width:2.25rem;height:2.25rem;border-radius:50%;background:rgba(5,5,5,0.1);display:flex;align-items:center;justify-content:center;transition:all 0.5s cubic-bezier(0.32,0.72,0,1);flex-shrink:0}
+    .btn:hover .btn-icon-wrap{transform:translateX(3px) translateY(-1px) scale(1.05)}
+    .btn-icon-wrap svg{width:1rem;height:1rem;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
     /* ===== HERO ===== */
-    .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:7rem 0 5rem}
-    .hero::before{content:'';position:absolute;width:70vmax;height:70vmax;top:20%;left:-10%;background:radial-gradient(circle,rgba(255,216,77,.07) 0%,transparent 65%);animation:orbit 24s ease-in-out infinite;pointer-events:none}
-    @media(prefers-reduced-motion:reduce){.hero::before,.hero::after,.game-card::after,.orb{animation:none!important}}
-    .hero::after{content:'';position:absolute;width:55vmax;height:55vmax;bottom:10%;right:-5%;background:radial-gradient(circle,rgba(0,201,167,.05) 0%,transparent 65%);animation:orbit 28s ease-in-out infinite reverse;pointer-events:none}
-    @keyframes orbit{0%,100%{transform:translate(0,0)}33%{transform:translate(8%,-10%)}66%{transform:translate(-6%,6%)}}
+    .hero{position:relative;z-index:1;min-height:100dvh;display:flex;align-items:center;padding:8rem 0 6rem}
     .hero .container{position:relative;z-index:1;width:100%;text-align:center}
-    .hero-eyebrow{display:inline-block;font-family:Barlow,sans-serif;font-weight:600;font-size:.8125rem;letter-spacing:.2em;text-transform:uppercase;color:#00C9A7;margin-bottom:1.5rem;padding:.35rem 1rem;border:1px solid rgba(0,201,167,.25);border-radius:100px}
-    .hero-title{font-family:Barlow,sans-serif;font-weight:900;font-size:clamp(2.75rem,7vw,5.5rem);line-height:1;letter-spacing:-.02em;text-transform:uppercase;margin-bottom:1.5rem;color:#F7F3EB}
-    .hero-title span{color:#FFD84D}
-    .hero-sub{font-size:clamp(1rem,2vw,1.25rem);color:rgba(247,243,235,.65);max-width:580px;margin:0 auto 2.25rem;line-height:1.7}
-    .hero-actions{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-bottom:3rem}
-    .hero-stats{display:flex;flex-wrap:wrap;gap:1.5rem 2.5rem;justify-content:center;font-size:.85rem;color:rgba(247,243,235,.5);letter-spacing:.05em}
-    .hero-stats span{color:#FFD84D;font-weight:700}
-    @media(max-width:600px){.hero{padding:6rem 0 3rem;min-height:auto}.hero-title{font-size:clamp(2rem,10vw,3rem)}}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;font-size:0.75rem;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#00C9A7;margin-bottom:2rem;padding:0.4rem 1.1rem;border-radius:100px;border:1px solid rgba(0,201,167,0.2);opacity:0;animation:fadeSlideUp 0.8s cubic-bezier(0.32,0.72,0,1) 0.3s forwards}
+    .hero-eyebrow span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#00C9A7;animation:pulse 2.4s cubic-bezier(0.32,0.72,0,1) infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    @keyframes fadeSlideUp{from{opacity:0;transform:translateY(1.25rem)}to{opacity:1;transform:translateY(0)}}
 
-    /* ===== SECTIONS ===== */
-    .section{padding:6rem 0}
-    .section-label{font-family:Barlow,sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;color:#00C9A7;margin-bottom:.75rem}
-    .section-title{font-family:Barlow,sans-serif;font-weight:700;font-size:clamp(1.5rem,3.5vw,2.75rem);line-height:1.1;letter-spacing:-.01em;margin-bottom:1rem}
-    .section-desc{color:rgba(247,243,235,.55);max-width:560px;font-size:1.05rem;margin-bottom:3rem}
-    .section--dark{background:#0E0F18}
+    .hero-title{font-family:'Clash Display',sans-serif;font-weight:700;font-size:clamp(3rem,9vw,7rem);line-height:0.92;letter-spacing:-0.04em;text-transform:uppercase;margin-bottom:1.75rem;color:#F7F3EB;opacity:0;animation:fadeSlideUp 0.9s cubic-bezier(0.32,0.72,0,1) 0.5s forwards}
+    .hero-title span{color:#FFD84D;position:relative;display:inline-block}
+    .hero-title span::after{content:'';position:absolute;bottom:0.08em;left:0;right:0;height:0.04em;background:#FFD84D;transform:scaleX(0);transform-origin:left;animation:strike 1s cubic-bezier(0.32,0.72,0,1) 1.4s forwards}
+    @keyframes strike{to{transform:scaleX(1)}}
 
-    /* ===== GAMES GRID ===== */
-    .games-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
-    @media(max-width:700px){.games-grid{grid-template-columns:1fr}}
+    .hero-sub{font-size:clamp(1.05rem,2vw,1.3rem);color:rgba(247,243,235,0.5);max-width:520px;margin:0 auto 2.5rem;line-height:1.75;opacity:0;animation:fadeSlideUp 0.8s cubic-bezier(0.32,0.72,0,1) 0.7s forwards}
 
-    .game-card{position:relative;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:2rem 1.75rem;overflow:hidden;transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .35s;cursor:default}
-    .game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent,#FFD84D);opacity:.6;transition:opacity .35s}
-    .game-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.12)}
-    .game-card:hover::before{opacity:1}
-    .game-card-count{font-family:Barlow,sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.15em;color:rgba(247,243,235,.3);margin-bottom:.75rem}
-    .game-card-name{font-family:Barlow,sans-serif;font-weight:700;font-size:1.35rem;margin-bottom:.5rem;letter-spacing:-.01em}
-    .game-card-desc{font-size:.9rem;color:rgba(247,243,235,.5);line-height:1.6;margin-bottom:1.25rem}
-    .game-card-tag{display:inline-block;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.25rem .75rem;border-radius:100px;border:1px solid var(--card-accent,#FFD84D);color:var(--card-accent,#FFD84D);opacity:.7}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-bottom:3.5rem;opacity:0;animation:fadeSlideUp 0.8s cubic-bezier(0.32,0.72,0,1) 0.9s forwards}
+    .hero-stats{display:flex;flex-wrap:wrap;gap:2rem 3rem;justify-content:center;font-size:0.85rem;color:rgba(247,243,235,0.35);letter-spacing:0.06em;opacity:0;animation:fadeSlideUp 0.8s cubic-bezier(0.32,0.72,0,1) 1.1s forwards}
+    .hero-stats strong{color:#F7F3EB;font-weight:600}
 
-    .game-card:nth-child(1){--card-accent:#4A7BFF}
-    .game-card:nth-child(2){--card-accent:#FF5E57}
-    .game-card:nth-child(3){--card-accent:#FFD84D}
-    .game-card:nth-child(4){--card-accent:#00C9A7}
+    @media(max-width:768px){.hero{min-height:auto;padding:6rem 0 4rem}.hero-title{font-size:clamp(2.25rem,12vw,3.5rem)}}
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal{opacity:0;transform:translateY(3rem) scale(0.98);filter:blur(6px);transition:all 0.9s cubic-bezier(0.32,0.72,0,1)}
+    .reveal.visible{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+
+    /* ===== SECTION SHELL ===== */
+    .section{padding:7rem 0;position:relative;z-index:1}
+    .section-label{font-family:'Clash Display',sans-serif;font-weight:500;font-size:0.7rem;letter-spacing:0.28em;text-transform:uppercase;color:#00C9A7;margin-bottom:0.75rem}
+    .section-title{font-family:'Clash Display',sans-serif;font-weight:600;font-size:clamp(2rem,4.5vw,3.5rem);line-height:1.05;letter-spacing:-0.03em;margin-bottom:1rem}
+    .section-desc{color:rgba(247,243,235,0.45);max-width:500px;font-size:1.05rem;line-height:1.75;margin-bottom:3.5rem}
+
+    @media(max-width:768px){.section{padding:4.5rem 0}.section-desc{max-width:100%}}
+
+    /* ===== DOUBLE-BEZEL CARD ===== */
+    .shell{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);padding:0.375rem;border-radius:1.75rem;transition:border-color 0.6s cubic-bezier(0.32,0.72,0,1),transform 0.6s cubic-bezier(0.32,0.72,0,1)}
+    .shell:hover{border-color:rgba(255,255,255,0.1);transform:translateY(-2px)}
+    .shell-core{background:#0A0A0A;border-radius:calc(1.75rem - 0.375rem);padding:2rem 1.75rem;box-shadow:inset 0 1px 1px rgba(255,255,255,0.04);height:100%;display:flex;flex-direction:column}
+    .shell-core--flush{padding:0}
+    .shell-core--flush .shell-core-inner{padding:2rem 1.75rem}
+
+    /* ===== ASYMMETRICAL BENTO GRID ===== */
+    .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
+    @media(max-width:768px){.bento{grid-template-columns:1fr;gap:1rem}.bento>*{grid-column:1!important;grid-row:auto!important}}
+
+    .bento-game{grid-column:span 6;grid-row:span 1}
+    .bento-game:nth-child(1){grid-column:span 7}
+    .bento-game:nth-child(2){grid-column:span 5}
+    .bento-game:nth-child(3){grid-column:span 5}
+    .bento-game:nth-child(4){grid-column:span 7}
+
+    .game-count{font-family:'Clash Display',sans-serif;font-weight:500;font-size:0.65rem;letter-spacing:0.15em;color:rgba(247,243,235,0.2);margin-bottom:0.5rem}
+    .game-name{font-family:'Clash Display',sans-serif;font-weight:600;font-size:1.35rem;margin-bottom:0.4rem;letter-spacing:-0.01em}
+    .game-desc{font-size:0.875rem;color:rgba(247,243,235,0.45);line-height:1.65;flex:1}
+    .game-tag{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.65rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.25rem 0.85rem;border-radius:100px;border:1px solid rgba(255,255,255,0.08);color:rgba(247,243,235,0.5);margin-top:1rem;width:fit-content}
+
+    /* ===== MODES BENTO ===== */
+    .bento-mode{grid-column:span 4}
+    .bento-mode .shell-core{padding:2.5rem 2rem}
+    .mode-symbol{width:2.5rem;height:2.5rem;border-radius:0.75rem;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03)}
+    .mode-symbol svg{width:1.25rem;height:1.25rem}
+    .mode-name{font-family:'Clash Display',sans-serif;font-weight:600;font-size:1.15rem;margin-bottom:0.4rem}
+    .mode-desc{font-size:0.85rem;color:rgba(247,243,235,0.45);line-height:1.65;flex:1}
+
+    @media(max-width:768px){.bento-mode{grid-column:span 1}}
 
     /* ===== STEPS ===== */
-    .steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;position:relative}
-    .steps::before{content:'';position:absolute;top:2.5rem;left:calc(16.66% + .5rem);right:calc(16.66% + .5rem);height:1px;background:linear-gradient(90deg,transparent,rgba(255,216,77,.3) 15%,rgba(255,216,77,.3) 85%,transparent)}
-    @media(max-width:700px){.steps{grid-template-columns:1fr;gap:2rem}.steps::before{display:none}}
-    .step{text-align:center;position:relative}
-    .step-num{width:3.5rem;height:3.5rem;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:Barlow,sans-serif;font-weight:700;font-size:1.25rem;background:rgba(255,216,77,.08);border:1px solid rgba(255,216,77,.15);color:#FFD84D}
-    .step-title{font-family:Barlow,sans-serif;font-weight:600;font-size:1.15rem;margin-bottom:.5rem}
-    .step-desc{font-size:.9rem;color:rgba(247,243,235,.5);line-height:1.6;max-width:300px;margin:0 auto}
-    @media(max-width:700px){.step-desc{max-width:100%}}
+    .bento-step{grid-column:span 4;text-align:center;padding:2.5rem 1.5rem}
+    .bento-step .shell-core{align-items:center;padding:2.5rem 1.5rem}
+    .step-index{width:3rem;height:3rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:500;font-size:0.9rem;background:rgba(255,216,77,0.08);border:1px solid rgba(255,216,77,0.12);color:#FFD84D;margin-bottom:1.25rem}
+    .step-title{font-family:'Clash Display',sans-serif;font-weight:600;font-size:1.15rem;margin-bottom:0.5rem}
+    .step-desc{font-size:0.85rem;color:rgba(247,243,235,0.45);line-height:1.65;max-width:300px;margin:0 auto}
 
-    /* ===== MODES ===== */
-    .modes-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem}
-    @media(max-width:700px){.modes-grid{grid-template-columns:1fr}}
-    .mode-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:2rem 1.75rem;transition:border-color .35s,transform .35s cubic-bezier(.34,1.56,.64,1)}
-    .mode-card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-3px)}
-    .mode-icon{font-size:1.75rem;margin-bottom:1rem;display:block}
-    .mode-name{font-family:Barlow,sans-serif;font-weight:700;font-size:1.15rem;margin-bottom:.5rem}
-    .mode-desc{font-size:.875rem;color:rgba(247,243,235,.5);line-height:1.6}
+    @media(max-width:768px){.bento-step{grid-column:span 1}}
 
     /* ===== STATS ===== */
-    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
-    @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr);gap:2rem}}
-    .stat{text-align:center}
-    .stat-num{font-family:Barlow,sans-serif;font-weight:900;font-size:clamp(2.25rem,4vw,3.5rem);line-height:1;letter-spacing:-.03em;color:#FFD84D;margin-bottom:.35rem}
-    .stat-label{font-size:.825rem;color:rgba(247,243,235,.45);text-transform:uppercase;letter-spacing:.1em}
+    .bento-stat{grid-column:span 3;text-align:center}
+    .bento-stat .shell-core{padding:2rem 1rem;align-items:center}
+    .stat-num{font-family:'Clash Display',sans-serif;font-weight:600;font-size:clamp(2.25rem,4vw,3.25rem);line-height:1;letter-spacing:-0.03em;color:#FFD84D;margin-bottom:0.3rem}
+    .stat-label{font-size:0.75rem;color:rgba(247,243,235,0.35);text-transform:uppercase;letter-spacing:0.12em}
+
+    @media(max-width:768px){.bento-stat{grid-column:span 2}.bento-stat:nth-child(3),.bento-stat:nth-child(4){grid-column:span 2}}
 
     /* ===== FINAL CTA ===== */
-    .cta-final{text-align:center;padding:6rem 0}
-    .cta-final .section-title{font-size:clamp(1.75rem,4vw,3.25rem)}
+    .cta-final{text-align:center;padding:7rem 0 5rem;position:relative;z-index:1}
+    .cta-final .section-title{font-size:clamp(2rem,5vw,4rem)}
     .cta-final .section-desc{margin-left:auto;margin-right:auto}
 
     /* ===== FOOTER ===== */
-    .footer{border-top:1px solid rgba(255,255,255,.06);padding:2.5rem 0}
+    .footer{border-top:1px solid rgba(255,255,255,0.04);padding:2.5rem 0;position:relative;z-index:1}
     .footer .container{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-    .footer-logo{font-family:Barlow,sans-serif;font-weight:700;font-size:.875rem;letter-spacing:.12em;color:rgba(247,243,235,.4)}
-    .footer-links{display:flex;gap:1.5rem;font-size:.8rem}
-    .footer-links a{color:rgba(247,243,235,.35);transition:color .25s}
-    .footer-links a:hover{color:rgba(247,243,235,.7)}
-    @media(max-width:480px){.footer .container{flex-direction:column;text-align:center}}
+    .footer-logo{font-family:'Clash Display',sans-serif;font-weight:500;font-size:0.8125rem;letter-spacing:0.14em;color:rgba(247,243,235,0.25)}
+    .footer-links{display:flex;gap:1.75rem}
+    .footer-links a{font-size:0.8rem;color:rgba(247,243,235,0.25);transition:color 0.5s cubic-bezier(0.32,0.72,0,1)}
+    .footer-links a:hover{color:rgba(247,243,235,0.6)}
 
-    /* ===== REVEAL ANIMATION ===== */
-    .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
-    .reveal.visible{opacity:1;transform:translateY(0)}
-    @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
-
-    /* ===== SCROLL MARGIN ===== */
-    #games,#modes,#how{margin-top:-5rem;padding-top:5rem}
-
+    @media(max-width:480px){.footer .container{flex-direction:column;text-align:center}.footer-links{gap:1.25rem}}
   </style>
 </head>
 <body>
 
-  <!-- ===== HEADER ===== -->
-  <header class="header" role="banner">
-    <div class="container">
-      <span class="header-logo">HOUSE<span>.</span></span>
-      <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="header-cta" target="_blank" rel="noopener">Add to Discord</a>
+  <div class="noise"></div>
+  <div class="bg-orb bg-orb--1"></div>
+  <div class="bg-orb bg-orb--2"></div>
+  <div class="bg-orb bg-orb--3"></div>
+
+  <!-- ===== FLUID ISLAND NAV ===== -->
+  <nav class="nav" role="navigation">
+    <div class="nav-bar">
+      <span class="nav-logo">HOUSE<em>.</em></span>
+      <div class="nav-actions">
+        <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="nav-cta" target="_blank" rel="noopener">Add to Discord</a>
+        <button class="hamburger" aria-label="Toggle menu" onclick="toggleNav()">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
     </div>
-  </header>
+  </nav>
+
+  <!-- ===== OVERLAY NAV ===== -->
+  <div class="nav-overlay" id="navOverlay">
+    <div class="nav-overlay-inner">
+      <a href="#games" class="nav-link" onclick="toggleNav()">Games</a>
+      <a href="#how" class="nav-link" onclick="toggleNav()">How It Works</a>
+      <a href="#modes" class="nav-link" onclick="toggleNav()">Modes</a>
+      <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="nav-link" onclick="toggleNav()" target="_blank" rel="noopener">Add to Discord</a>
+    </div>
+  </div>
 
   <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="container">
-      <p class="hero-eyebrow">Now on Discord</p>
+      <p class="hero-eyebrow"><span></span> Now on Discord</p>
       <h1 class="hero-title">The House<br>Has a Game<span>.</span></h1>
       <p class="hero-sub">Competitive multiplayer game shows for your Discord server. Gather ten players, pick a show, and prove who&rsquo;s the best.</p>
       <div class="hero-actions">
-        <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn btn--primary btn--large" target="_blank" rel="noopener">Add to Discord</a>
+        <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn btn--primary btn--large" target="_blank" rel="noopener">
+          Add to Discord
+          <span class="btn-icon-wrap">
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </a>
       </div>
       <div class="hero-stats">
-        <span>4</span> game shows &middot; <span>256+</span> questions &middot; <span>3</span> game modes
+        <strong>4</strong> game shows&nbsp;&nbsp;&middot;&nbsp;&nbsp;<strong>256+</strong> questions&nbsp;&nbsp;&middot;&nbsp;&nbsp;<strong>3</strong> game modes
       </div>
     </div>
   </section>
@@ -166,66 +236,80 @@
   <section class="section" id="games">
     <div class="container">
       <p class="section-label reveal">The Lineup</p>
-      <h2 class="section-title reveal">Four Shows. One House.</h2>
+      <h2 class="section-title reveal">Four Shows.<br>One House.</h2>
       <p class="section-desc reveal">Each game tests a different kind of clever. None of them play the same way twice.</p>
-      <div class="games-grid">
+      <div class="bento">
 
-        <article class="game-card reveal">
-          <p class="game-card-count">01</p>
-          <h3 class="game-card-name">Majority Rules</h3>
-          <p class="game-card-desc">Ten rounds of predicting what everyone else will pick. Score when you vote with the crowd. Your gut vs. the table.</p>
-          <span class="game-card-tag">10 Players</span>
-        </article>
+        <div class="bento-game reveal">
+          <div class="shell"><div class="shell-core">
+            <p class="game-count">01</p>
+            <h3 class="game-name">Majority Rules</h3>
+            <p class="game-desc">Ten rounds of predicting what everyone else will pick. Score when you vote with the crowd. Your gut vs. the table.</p>
+            <span class="game-tag">10 Players</span>
+          </div></div>
+        </div>
 
-        <article class="game-card reveal">
-          <p class="game-card-count">02</p>
-          <h3 class="game-card-name">One Night Mafia</h3>
-          <p class="game-card-desc">A single round of high-stakes deduction. Someone at the table is the imposter. Find them before dawn breaks.</p>
-          <span class="game-card-tag">10 Players</span>
-        </article>
+        <div class="bento-game reveal">
+          <div class="shell"><div class="shell-core">
+            <p class="game-count">02</p>
+            <h3 class="game-name">One Night Mafia</h3>
+            <p class="game-desc">A single round of high-stakes deduction. Someone at the table is the imposter. Find them before dawn breaks.</p>
+            <span class="game-tag">10 Players</span>
+          </div></div>
+        </div>
 
-        <article class="game-card reveal">
-          <p class="game-card-count">03</p>
-          <h3 class="game-card-name">Trivia Challenge</h3>
-          <p class="game-card-desc">Two hundred and thirty-six questions across seven categories. Bottom two are eliminated every round. Last one standing wins.</p>
-          <span class="game-card-tag">236 Questions</span>
-        </article>
+        <div class="bento-game reveal">
+          <div class="shell"><div class="shell-core">
+            <p class="game-count">03</p>
+            <h3 class="game-name">Trivia Challenge</h3>
+            <p class="game-desc">Two hundred thirty-six questions across seven categories. Bottom two eliminated every round. Last one standing wins.</p>
+            <span class="game-tag">236 Questions</span>
+          </div></div>
+        </div>
 
-        <article class="game-card reveal">
-          <p class="game-card-count">04</p>
-          <h3 class="game-card-name">The Trust Game</h3>
-          <p class="game-card-desc">Everyone sees your card except you. Ask shrewd questions, decide who to trust, and guess your hand before time runs out.</p>
-          <span class="game-card-tag">8 Rounds</span>
-        </article>
+        <div class="bento-game reveal">
+          <div class="shell"><div class="shell-core">
+            <p class="game-count">04</p>
+            <h3 class="game-name">The Trust Game</h3>
+            <p class="game-desc">Everyone sees your card except you. Ask shrewd questions, decide who to trust, and guess your hand before time runs out.</p>
+            <span class="game-tag">8 Rounds</span>
+          </div></div>
+        </div>
 
       </div>
     </div>
   </section>
 
   <!-- ===== HOW IT WORKS ===== -->
-  <section class="section section--dark" id="how">
+  <section class="section" id="how">
     <div class="container">
       <p class="section-label reveal">How to Play</p>
-      <h2 class="section-title reveal">Three Moves and You&rsquo;re In</h2>
+      <h2 class="section-title reveal">Three Moves<br>and You&rsquo;re In</h2>
       <p class="section-desc reveal">Getting a season started takes about thirty seconds. The hard part is lasting to the final round.</p>
-      <div class="steps">
+      <div class="bento">
 
-        <div class="step reveal">
-          <div class="step-num">1</div>
-          <h3 class="step-title">Add the Bot</h3>
-          <p class="step-desc">Invite House of Games to your server with one click. No configuration, no channels to set up.</p>
+        <div class="bento-step reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="step-index">1</div>
+            <h3 class="step-title">Add the Bot</h3>
+            <p class="step-desc">Invite House of Games to your server with one click. No configuration, no channels to set up.</p>
+          </div></div>
         </div>
 
-        <div class="step reveal">
-          <div class="step-num">2</div>
-          <h3 class="step-title">Gather Your Crew</h3>
-          <p class="step-desc">Players use <code>/join</code> to enter the lobby. The host starts the game once ten players are in.</p>
+        <div class="bento-step reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="step-index">2</div>
+            <h3 class="step-title">Gather Your Crew</h3>
+            <p class="step-desc">Players use <code style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85em;padding:0.1em 0.35em;background:rgba(255,255,255,0.06);border-radius:4px">/join</code> to enter the lobby. The host starts the game once ten players are in.</p>
+          </div></div>
         </div>
 
-        <div class="step reveal">
-          <div class="step-num">3</div>
-          <h3 class="step-title">Play the Season</h3>
-          <p class="step-desc">Campaign mode eliminates players round by round. Standalone and local modes let you play without the stakes.</p>
+        <div class="bento-step reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="step-index">3</div>
+            <h3 class="step-title">Play the Season</h3>
+            <p class="step-desc">Campaign mode eliminates players round by round. Standalone and local modes let you play without the stakes.</p>
+          </div></div>
         </div>
 
       </div>
@@ -236,39 +320,38 @@
   <section class="section" id="modes">
     <div class="container">
       <p class="section-label reveal">Your Season, Your Way</p>
-      <h2 class="section-title reveal">Three Ways to Play</h2>
+      <h2 class="section-title reveal">Three Ways<br>to Play</h2>
       <p class="section-desc reveal">Whether you want a full tournament or a quick warm-up, there&rsquo;s a mode for it.</p>
-      <div class="modes-grid">
+      <div class="bento">
 
-        <div class="mode-card reveal">
-          <span class="mode-icon">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 4L18.5 11H26L20 15.5L22.5 23L16 18.5L9.5 23L12 15.5L6 11H13.5L16 4Z" fill="#FFD84D" opacity=".9"/>
-            </svg>
-          </span>
-          <h3 class="mode-name">Campaign</h3>
-          <p class="mode-desc">A full season with eliminations. Players are voted out round by round until one champion remains. Persistent leaderboards track every victory across your server.</p>
+        <div class="bento-mode reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="mode-symbol">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <h3 class="mode-name">Campaign</h3>
+            <p class="mode-desc">A full season with eliminations. Players are voted out round by round until one champion remains. Persistent leaderboards track every victory across your server.</p>
+          </div></div>
         </div>
 
-        <div class="mode-card reveal">
-          <span class="mode-icon">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 6L26 16L8 26V6Z" fill="#00C9A7" opacity=".9"/>
-            </svg>
-          </span>
-          <h3 class="mode-name">Standalone</h3>
-          <p class="mode-desc">Jump into any game without commitment. Scores reset each session and there&rsquo;re no eliminations. Perfect for casual rounds or introducing new players.</p>
+        <div class="bento-mode reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="mode-symbol">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#00C9A7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <h3 class="mode-name">Standalone</h3>
+            <p class="mode-desc">Jump into any game without commitment. Scores reset each session and there&rsquo;re no eliminations. Perfect for casual rounds or introducing new players.</p>
+          </div></div>
         </div>
 
-        <div class="mode-card reveal">
-          <span class="mode-icon">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="16" cy="11" r="4" stroke="#FF5E57" stroke-width="2" opacity=".9"/>
-              <path d="M8 28C8 23 11 19 16 19C21 19 24 23 24 28" stroke="#FF5E57" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-            </svg>
-          </span>
-          <h3 class="mode-name">Local</h3>
-          <p class="mode-desc">Practice mode with no tracking. Learn the rules, test strategies, play for fun. Nothing gets recorded — pure sandbox.</p>
+        <div class="bento-mode reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="mode-symbol">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF5E57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <h3 class="mode-name">Local</h3>
+            <p class="mode-desc">Practice mode with no tracking. Learn the rules, test strategies, play for fun. Nothing gets recorded &mdash; pure sandbox.</p>
+          </div></div>
         </div>
 
       </div>
@@ -276,14 +359,39 @@
   </section>
 
   <!-- ===== STATS ===== -->
-  <section class="section section--dark">
+  <section class="section">
     <div class="container">
       <p class="section-label reveal">By the Numbers</p>
-      <div class="stats-grid">
-        <div class="stat reveal"><div class="stat-num">4</div><div class="stat-label">Game Shows</div></div>
-        <div class="stat reveal"><div class="stat-num">256+</div><div class="stat-label">Questions</div></div>
-        <div class="stat reveal"><div class="stat-num">10</div><div class="stat-label">Per Session</div></div>
-        <div class="stat reveal"><div class="stat-num">3</div><div class="stat-label">Game Modes</div></div>
+      <div class="bento">
+
+        <div class="bento-stat reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="stat-num">4</div>
+            <div class="stat-label">Game Shows</div>
+          </div></div>
+        </div>
+
+        <div class="bento-stat reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="stat-num">256+</div>
+            <div class="stat-label">Questions</div>
+          </div></div>
+        </div>
+
+        <div class="bento-stat reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="stat-num">10</div>
+            <div class="stat-label">Per Session</div>
+          </div></div>
+        </div>
+
+        <div class="bento-stat reveal">
+          <div class="shell"><div class="shell-core">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Game Modes</div>
+          </div></div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -294,7 +402,12 @@
       <h2 class="section-title reveal">Your Table Is Waiting</h2>
       <p class="section-desc reveal">Add House of Games to your server. The first season starts the moment you do.</p>
       <div class="reveal">
-        <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn btn--primary btn--large" target="_blank" rel="noopener">Add to Discord</a>
+        <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn btn--primary btn--large" target="_blank" rel="noopener">
+          Add to Discord
+          <span class="btn-icon-wrap">
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </a>
       </div>
     </div>
   </section>
@@ -312,6 +425,14 @@
   </footer>
 
   <script>
+    function toggleNav() {
+      var overlay = document.getElementById('navOverlay');
+      var hamburger = document.querySelector('.hamburger');
+      var isOpen = overlay.classList.toggle('open');
+      hamburger.classList.toggle('active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+
     (function() {
       var reveals = document.querySelectorAll('.reveal');
       if (!reveals.length) return;
@@ -324,7 +445,7 @@
               observer.unobserve(entry.target);
             }
           });
-        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
 
         reveals.forEach(function(el) { observer.observe(el); });
       } else {
