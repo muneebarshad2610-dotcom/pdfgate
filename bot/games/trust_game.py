@@ -113,12 +113,17 @@ class TrustGame(BaseGame):
         timeout = 90
         if self.session.timer:
             await self.session.timer.start(f"trust_questions_{round_number}", timeout, lambda: None)
+        countdown_msg = None
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":
                 return
             if remaining % 10 == 0 and channel:
+                text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining}s** remaining in questioning phase"
                 try:
-                    await channel.send(f"⏱ {remaining}s remaining in questioning phase")
+                    if countdown_msg:
+                        await countdown_msg.edit(content=text)
+                    else:
+                        countdown_msg = await channel.send(text)
                 except Exception:
                     pass
             await asyncio.sleep(1)
@@ -126,7 +131,7 @@ class TrustGame(BaseGame):
         if channel:
             await channel.send(
                 embed={
-                    "title": "⏱ Time's Up!",
+                    "title": "<a:91490animatedarrowblue:1531868497242620014> Time's Up!",
                     "description": "Questioning phase is over. Moving to guesses...",
                     "color": 0xFEE75C,
                 }
@@ -231,7 +236,7 @@ class TrustGame(BaseGame):
                             "color": 0x57F287,
                             "fields": [
                                 {"name": "Your Question", "value": question_text, "inline": False},
-                                {"name": "Truth Token", "value": "Used — ✅ Guaranteed truthful", "inline": False},
+                                {"name": "Truth Token", "value": "Used — <:205150heart951:1531870116587900928> Guaranteed truthful", "inline": False},
                             ],
                         }
                     )
@@ -324,12 +329,17 @@ class TrustGame(BaseGame):
         timeout = 30
         if self.session.timer:
             await self.session.timer.start(f"trust_guess_{round_number}", timeout, lambda: None)
+        countdown_msg = None
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":
                 return
             if remaining % 10 == 0 and channel:
+                text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining}s** remaining in guess phase"
                 try:
-                    await channel.send(f"⏱ {remaining}s remaining in guess phase")
+                    if countdown_msg:
+                        await countdown_msg.edit(content=text)
+                    else:
+                        countdown_msg = await channel.send(text)
                 except Exception:
                     pass
             await asyncio.sleep(1)
@@ -353,12 +363,12 @@ class TrustGame(BaseGame):
             if correct:
                 self.session.score_player(pid, 3)
                 round_scoreboard[pid] = 3
-                status = "✅ Correct! +3"
+                status = "<:205150heart951:1531870116587900928> Correct! +3"
             elif guess is None:
-                status = "⏭️ No guess"
+                status = "<a:259419darkbluearrow:1531868494851739792> No guess"
                 round_scoreboard[pid] = 0
             else:
-                status = f"❌ Guessed {guess}"
+                status = f"<:73190blueasterisk:1531870110896226344> Guessed {guess}"
                 round_scoreboard[pid] = 0
             lines.append(f"{player.display_name}: **{actual}** — {status}")
 
@@ -397,7 +407,7 @@ class TrustGame(BaseGame):
         if channel:
             lines = []
             for i, p in enumerate(standings):
-                prefix = "🏆" if i == 0 else f"{i + 1}."
+                prefix = "<a:2434darkbluecrown:1531870115052916866>" if i == 0 else f"{i + 1}."
                 lines.append(f"{prefix} {p.display_name} — **{p.score} pts**")
 
             embed = {
@@ -458,7 +468,7 @@ class TrustGuessSelect(discord.ui.Select):
         await view.game.handle_guess(self._pid, card)
         self._guessed = True
         self.disabled = True
-        await interaction.response.send_message(f"✅ Guessed **{card}**", ephemeral=True)
+        await interaction.response.send_message(f"<:205150heart951:1531870116587900928> Guessed **{card}**", ephemeral=True)
 
 
 class TrustGuessView(discord.ui.View):

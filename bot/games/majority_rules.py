@@ -78,7 +78,7 @@ class MajorityRules(BaseGame):
                         "description": text,
                         "color": 0x5865F2,
                         "fields": [
-                            {"name": "⏱ Time", "value": "30 seconds", "inline": True},
+                            {"name": "<a:91490animatedarrowblue:1531868497242620014> Time", "value": "30 seconds", "inline": True},
                             {"name": "Players", "value": str(len(table)), "inline": True},
                         ],
                     },
@@ -105,12 +105,17 @@ class MajorityRules(BaseGame):
             timeout = 30
             await self.session.timer.start(f"mr_round_{round_number}_t{table_idx}", timeout, lambda: None)
 
+            countdown_msg = None
             for remaining in range(timeout, 0, -1):
                 if self.session.status != "in_progress":
                     return
                 if remaining % 10 == 0 and channel:
+                    text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining}s** remaining for Table {table_idx + 1}"
                     try:
-                        await channel.send(f"⏱ {remaining}s remaining for Table {table_idx + 1}")
+                        if countdown_msg:
+                            await countdown_msg.edit(content=text)
+                        else:
+                            countdown_msg = await channel.send(text)
                     except Exception:
                         pass
                 await asyncio.sleep(1)
@@ -148,7 +153,7 @@ class MajorityRules(BaseGame):
             for pid, score in scores.items():
                 all_scores[pid] = all_scores.get(pid, 0) + score
 
-        ranked = sorted(all_scores.items(), key=lambda x: (-x[1], x[0]))
+        ranked = sorted(all_scores.items(), key=lambda x: (-x[1], random.random()))
 
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
         if channel:
@@ -215,7 +220,7 @@ class MajorityVoteButton(discord.ui.Button):
             return
         view._results[pid] = self._opt_label
         view._voted.add(pid)
-        await interaction.response.send_message("✅ Vote recorded!", ephemeral=True)
+        await interaction.response.send_message("<:205150heart951:1531870116587900928> Vote recorded!", ephemeral=True)
 
 
 class MajorityVoteView(discord.ui.View):
@@ -268,7 +273,7 @@ class MinorityVoteDMButton(discord.ui.Button):
             return
         self._results[self._pid] = self._opt_label
         self.disabled = True
-        await interaction.response.send_message("✅ Vote recorded!", ephemeral=True)
+        await interaction.response.send_message("<:205150heart951:1531870116587900928> Vote recorded!", ephemeral=True)
 
 
 def calculate_majority(options, results):

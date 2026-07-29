@@ -108,12 +108,17 @@ class TriviaChallenge(BaseGame):
         timeout = 20
         if self.session.timer:
             await self.session.timer.start(f"trivia_round_{round_number}", timeout, lambda: None)
+        countdown_msg = None
         for remaining_time in range(timeout, 0, -1):
             if self.session.status != "in_progress":
                 return
             if remaining_time % 10 == 0 and channel:
+                text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining_time}s** remaining"
                 try:
-                    await channel.send(f"⏱ {remaining_time}s remaining")
+                    if countdown_msg:
+                        await countdown_msg.edit(content=text)
+                    else:
+                        countdown_msg = await channel.send(text)
                 except Exception:
                     pass
             await asyncio.sleep(1)
@@ -157,7 +162,7 @@ class TriviaChallenge(BaseGame):
             return (
                 self.session.state.players.get(str(pid), {}).score if self.session.state.players.get(str(pid)) else 0,
                 self._correct_counts.get(pid, 0),
-                pid,
+                random.random(),
             )
 
         remaining_sorted = sorted(remaining, key=sort_key)
@@ -191,7 +196,7 @@ class TriviaChallenge(BaseGame):
         if channel:
             lines = []
             for i, p in enumerate(standings):
-                prefix = "🏆" if i == 0 else f"{i + 1}."
+                prefix = "<a:2434darkbluecrown:1531870115052916866>" if i == 0 else f"{i + 1}."
                 lines.append(f"{prefix} {p.display_name} — **{p.score} pts**")
 
             eliminated = self.session.state.eliminated
@@ -199,7 +204,7 @@ class TriviaChallenge(BaseGame):
             for pid in eliminated:
                 player = self.session.state.players.get(str(pid))
                 if player:
-                    elim_lines.append(f"❌ {player.display_name} — Eliminated R{player.eliminated_at_round}")
+                    elim_lines.append(f"<:73190blueasterisk:1531870110896226344> {player.display_name} — Eliminated R{player.eliminated_at_round}")
 
             embed = {
                 "title": "Trivia Challenge — Final Standings",
@@ -213,7 +218,7 @@ class TriviaChallenge(BaseGame):
                 winner = self.session.state.players.get(str(remaining[0]))
                 if winner:
                     winner_name = winner.display_name
-                    embed["fields"].append({"name": "🏆 Winner", "value": winner_name, "inline": False})
+                    embed["fields"].append({"name": "<a:2434darkbluecrown:1531870115052916866> Winner", "value": winner_name, "inline": False})
 
             if elim_lines:
                 embed["fields"].append({"name": "Eliminated", "value": "\n".join(elim_lines), "inline": False})
@@ -252,7 +257,7 @@ class TriviaAnswerButton(discord.ui.Button):
             return
         view._game._round_answers[pid] = self._answer_idx
         self.disabled = True
-        await interaction.response.send_message("✅ Answer recorded!", ephemeral=True)
+        await interaction.response.send_message("<:205150heart951:1531870116587900928> Answer recorded!", ephemeral=True)
 
 
 class TriviaAnswerView(discord.ui.View):

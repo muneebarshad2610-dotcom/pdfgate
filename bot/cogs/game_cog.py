@@ -2,10 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.engine.session import SessionManager
 from bot.engine.modes import GameMode
-
-session_manager = SessionManager()
+from bot.cogs.session_cog import session_manager
 
 
 class GameCog(commands.GroupCog, group_name="play"):

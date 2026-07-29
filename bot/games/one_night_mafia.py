@@ -318,12 +318,17 @@ class OneNightMafia(BaseGame):
 
         timeout = 60
         await self.session.timer.start(f"mafia_vote", timeout, lambda: None)
+        countdown_msg = None
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":
                 return
             if remaining % 10 == 0 and channel:
+                text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining}s** remaining for voting"
                 try:
-                    await channel.send(f"⏱ {remaining}s remaining for voting")
+                    if countdown_msg:
+                        await countdown_msg.edit(content=text)
+                    else:
+                        countdown_msg = await channel.send(text)
                 except Exception:
                     pass
             await asyncio.sleep(1)
@@ -459,7 +464,7 @@ class MafiaVoteSelect(discord.ui.Select):
         if view.game.record_vote(pid, target_id):
             self._has_voted.add(pid)
             self.disabled = True
-            await interaction.response.send_message("✅ Vote recorded!", ephemeral=True)
+            await interaction.response.send_message("<:205150heart951:1531870116587900928> Vote recorded!", ephemeral=True)
         else:
             await interaction.response.send_message("You cannot vote.", ephemeral=True)
 

@@ -158,7 +158,7 @@ class SessionCog(commands.Cog):
 
         if session.state.player_order:
             players_list = "\n".join(
-                f"{'✅' if not p.eliminated else '❌'} {p.display_name} — {p.score} pts"
+                f"{'<:205150heart951:1531870116587900928>' if not p.eliminated else '<:73190blueasterisk:1531870110896226344>'} {p.display_name} — {p.score} pts"
                 for p in session.state.players.values()
             )
             embed.add_field(name="Players", value=players_list, inline=False)
