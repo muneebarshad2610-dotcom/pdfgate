@@ -1,4 +1,8 @@
+import asyncio
 import logging
+import os
+
+from aiohttp import web
 from discord import Intents, Activity, ActivityType
 from discord.ext import commands
 
@@ -51,6 +55,23 @@ class HouseOfGamesBot(commands.Bot):
         log.info("Connected to %d guilds", len(self.guilds))
 
 
+async def health_check(request):
+    return web.json_response({"status": "ok"}, status=200)
+
+
+async def start_health_server():
+    app = web.Application()
+    app.router.add_get("/", health_check)
+    app.router.add_get("/health", health_check)
+
+    port = int(os.getenv("PORT", "8080"))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    log.info("Health check server running on 0.0.0.0:%s", port)
+
+
 def main():
     logging.basicConfig(
         level=getattr(logging, config.logging.level),
@@ -62,8 +83,12 @@ def main():
         log.error("DISCORD_BOT_TOKEN is not set in .env")
         return
 
-    bot = HouseOfGamesBot()
-    bot.run(token)
+    async def runner():
+        await start_health_server()
+        bot = HouseOfGamesBot()
+        await bot.start(token)
+
+    asyncio.run(runner())
 
 
 if __name__ == "__main__":

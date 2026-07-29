@@ -10,4 +10,6 @@ COPY . .
 RUN useradd -m -u 1000 app && chown -R app:app /app
 USER app
 
+EXPOSE 8080
+
 CMD ["python", "main.py"]

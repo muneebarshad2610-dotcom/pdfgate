@@ -16,6 +16,7 @@
 | `BOT_ACTIVITY` | No | `House of Games` | Bot activity status |
 | `ADMIN_IDS` | No | — | Comma-separated Discord user IDs for admin commands |
 | `LOG_LEVEL` | No | `INFO` | Logging level (DEBUG, INFO, WARNING, ERROR) |
+| `PORT` | No | `8080` | HTTP port for health check server (set automatically by Railway) |
 
 ## Local Deployment
 
@@ -170,7 +171,33 @@ The project includes a GitHub Actions workflow (`.github/workflows/tests.yml`) t
 | `/sync` | Sync slash commands globally (requires admin ID in config) |
 | `/force_end` | Force-end all sessions on the current server (admin only) |
 
-## Health & Monitoring
+## Railway Health Checks
+
+Railway sends periodic HTTP requests to verify your app is alive. The bot runs a lightweight
+aiohttp health check server alongside the Discord client to respond to these checks.
+
+**Configuration:**
+
+| Setting | Value |
+|---------|-------|
+| Health check path | `/health` (also responds on `/`) |
+| Listen address | `0.0.0.0` (all interfaces) |
+| Port | `$PORT` (Railway injects this; defaults to `8080`) |
+
+The health check server starts before the Discord connection is established, so Railway will
+see the app as healthy as soon as the container boots. If the bot later disconnects or hangs,
+Railway will detect the missing health check response and restart the container.
+
+**Common failure causes:**
+
+- **Wrong host:** The server must bind to `0.0.0.0`, not `127.0.0.1`. Railway cannot reach
+  localhost-only servers.
+- **Missing PORT:** Railway assigns a dynamic port via the `PORT` environment variable. The
+  server reads `$PORT` and falls back to `8080`.
+- **Health check path mismatch:** Ensure `healthcheckPath` in `railway.json` matches a route
+  the server handles. Both `/` and `/health` are handled.
+
+## Logging & Monitoring
 
 - The bot logs to stdout at the configured `LOG_LEVEL`.
 - Railway provides built-in logging, metrics, and alerting.
