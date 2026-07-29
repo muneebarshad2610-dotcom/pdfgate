@@ -10,13 +10,14 @@ class HelpCog(commands.Cog):
 
     @app_commands.command(name="help", description="Show help and available commands")
     async def help(self, interaction: discord.Interaction):
-        embed = discord.Embed(
-            title="House of Games — Help",
+        from bot.ui import PaginatorView
+
+        page1 = discord.Embed(
+            title="House of Games — Help (1/2)",
             description="A competitive multi-game show experience for Discord.",
             color=discord.Color.blue(),
         )
-
-        embed.add_field(
+        page1.add_field(
             name="Session Commands",
             value=(
                 "`/create [mode]` — Create a new game session\n"
@@ -24,12 +25,12 @@ class HelpCog(commands.Cog):
                 "`/leave` — Leave the current session\n"
                 "`/start` — Start the game (host only)\n"
                 "`/end` — End the session (host only)\n"
-                "`/status` — Show session info"
+                "`/status` — Show session info\n"
+                "`/leaderboard [type]` — View rankings"
             ),
             inline=False,
         )
-
-        embed.add_field(
+        page1.add_field(
             name="Game Modes",
             value=(
                 "**Campaign** — Full season with eliminations and persistent leaderboard\n"
@@ -38,8 +39,7 @@ class HelpCog(commands.Cog):
             ),
             inline=False,
         )
-
-        embed.add_field(
+        page1.add_field(
             name="Available Games",
             value=(
                 "**Majority Rules** — Predict the majority answer (10 rounds)\n"
@@ -49,17 +49,21 @@ class HelpCog(commands.Cog):
             ),
             inline=False,
         )
+        page1.set_footer(text="Page 1/2 — Use ◀ ▶ to navigate")
 
-        embed.add_field(
+        page2 = discord.Embed(
+            title="House of Games — Help (2/2)",
+            color=discord.Color.blue(),
+        )
+        page2.add_field(
             name="In-Game Commands",
             value=(
-                "**The Trust Game:** `/ask @player question [tt:bool]` — Ask a player about your card\n"
+                "**The Trust Game:** `/ask @player question [tt:bool]` — Ask about your card\n"
                 "Most voting/guessing is done via **buttons and dropdowns** in DMs."
             ),
             inline=False,
         )
-
-        embed.add_field(
+        page2.add_field(
             name="Fun Commands",
             value=(
                 "`/fun roll [sides]` — Roll a dice\n"
@@ -70,8 +74,7 @@ class HelpCog(commands.Cog):
             ),
             inline=False,
         )
-
-        embed.add_field(
+        page2.add_field(
             name="Dev & Test Commands",
             value=(
                 "`/dev echo <text>` — Echo a message\n"
@@ -84,16 +87,13 @@ class HelpCog(commands.Cog):
             ),
             inline=False,
         )
-
-        embed.add_field(
+        page2.add_field(
             name="Admin Commands",
             value="`/ping` — Check bot latency\n`/sync [dev/global]` — Sync slash commands\n`/force_end` — End all sessions",
             inline=False,
         )
 
-        embed.set_footer(text="Use /play [game] to start a standalone game")
-
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=page1, view=PaginatorView([page1, page2]))
 
 
 async def setup(bot):

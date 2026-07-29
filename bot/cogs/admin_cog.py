@@ -61,5 +61,61 @@ class AdminCog(commands.Cog):
         await interaction.response.send_message(f"Force-ended {len(sessions)} session(s).")
 
 
+    @app_commands.command(name="leaderboard", description="Show the campaign leaderboard for this server")
+    @app_commands.describe(mode="Leaderboard type (default: campaign)")
+    @app_commands.choices(mode=[
+        app_commands.Choice(name="campaign — Season-long points", value="campaign"),
+        app_commands.Choice(name="standalone — Current session scores", value="standalone"),
+    ])
+    async def leaderboard(self, interaction: discord.Interaction, mode: str = "campaign"):
+        from bot.cogs.session_cog import session_manager
+        from bot.engine.modes import GameMode
+        from bot.ui import PaginatorView
+
+        await interaction.response.defer()
+
+        if mode == "campaign":
+            lb = await self._get_campaign_leaderboard(interaction.guild_id)
+        else:
+            session = session_manager.get_session_by_channel(interaction.channel_id)
+            if not session:
+                await interaction.followup.send("No active session to show standings for.", ephemeral=True)
+                return
+            lb = await session.leaderboard.get_standings(interaction.guild_id, GameMode.STANDALONE, session.id)
+
+        if not lb:
+            await interaction.followup.send("No leaderboard entries yet. Play some games first!", ephemeral=True)
+            return
+
+        per_page = 10
+        pages = []
+        for start in range(0, len(lb), per_page):
+            chunk = lb[start:start + per_page]
+            lines = []
+            for i, entry in enumerate(chunk, start=start + 1):
+                prefix = "<a:2434darkbluecrown:1531870115052916866>" if i == 1 else f"{i}."
+                pts = entry.get("campaign_points", entry.get("session_points", 0))
+                name = entry.get("display_name", "Unknown")
+                lines.append(f"{prefix} {name} — **{pts} pts**")
+
+            embed = discord.Embed(
+                title=f"Leaderboard — {mode.title()}",
+                description="\n".join(lines),
+                color=0xFFD84D,
+            )
+            embed.set_footer(text=f"Page {start // per_page + 1}/{(len(lb) - 1) // per_page + 1}")
+            pages.append(embed)
+
+        if len(pages) == 1:
+            await interaction.followup.send(embed=pages[0])
+        else:
+            await interaction.followup.send(embed=pages[0], view=PaginatorView(pages))
+
+    async def _get_campaign_leaderboard(self, guild_id: int):
+        from bot.engine.leaderboard import LeaderboardManager
+        lbm = LeaderboardManager()
+        return await lbm.get_campaign_standings(guild_id)
+
+
 async def setup(bot):
     await bot.add_cog(AdminCog(bot))
