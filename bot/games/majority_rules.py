@@ -1,5 +1,8 @@
 import random
 import json
+import asyncio
+
+import discord
 
 from bot.engine.base import BaseGame
 from bot.config import QUESTIONS_DIR
@@ -64,11 +67,8 @@ class MajorityRules(BaseGame):
             table_results = {}
             view = MajorityVoteView(
                 options=options,
-                round_number=round_number,
-                table_idx=table_idx,
-                game=self,
+                table=table,
                 results=table_results,
-                timeout=30,
             )
 
             if self.session.bot and channel:
@@ -97,7 +97,7 @@ class MajorityRules(BaseGame):
                                         "description": text,
                                         "color": 0x57F287,
                                     },
-                                    view=MinorityVoteDMView(options, round_number, table_idx, self, table_results),
+                                    view=MinorityVoteDMView(options=options, results=table_results, pid=pid),
                                 )
                             except Exception:
                                 pass
@@ -108,7 +108,11 @@ class MajorityRules(BaseGame):
             for remaining in range(timeout, 0, -1):
                 if self.session.status != "in_progress":
                     return
-                import asyncio
+                if remaining % 10 == 0 and channel:
+                    try:
+                        await channel.send(f"⏱ {remaining}s remaining for Table {table_idx + 1}")
+                    except Exception:
+                        pass
                 await asyncio.sleep(1)
 
             view.disable_all()
@@ -156,7 +160,7 @@ class MajorityRules(BaseGame):
                 embed={
                     "title": "Final Standings — Majority Rules",
                     "description": standings,
-                    "color": 0x57F287,
+                    "color": 0x808080,
                 }
             )
 
@@ -194,38 +198,77 @@ class MajorityRules(BaseGame):
                     )
 
 
-class MajorityVoteView:
-    def __init__(self, options, round_number, table_idx, game, results, timeout):
-        self.items = {}
-        self.timeout = timeout
-        self._options = options
-        self._round_number = round_number
-        self._table_idx = table_idx
-        self._game = game
-        self._results = results
-        self._disabled = False
+class MajorityVoteButton(discord.ui.Button):
 
-    async def handle_vote(self, pid, answer):
-        if self._disabled:
+    def __init__(self, label: str):
+        super().__init__(label=label, style=discord.ButtonStyle.secondary)
+        self._opt_label = label
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        view: MajorityVoteView = self.view
+        pid = interaction.user.id
+        if pid not in view._table_set:
+            await interaction.response.send_message("You're not in this table.", ephemeral=True)
             return
-        self._results[pid] = answer
+        if pid in view._voted:
+            await interaction.response.send_message("You already voted!", ephemeral=True)
+            return
+        view._results[pid] = self._opt_label
+        view._voted.add(pid)
+        await interaction.response.send_message("✅ Vote recorded!", ephemeral=True)
 
-    def disable_all(self):
-        self._disabled = True
-        self.items = {}
+
+class MajorityVoteView(discord.ui.View):
+
+    def __init__(self, options: list, table: list, results: dict):
+        super().__init__(timeout=30.0)
+        self._results = results
+        self._table_set = set(table)
+        self._voted = set()
+        for opt in options:
+            self.add_item(MajorityVoteButton(opt))
+
+    def disable_all(self) -> None:
+        for child in self.children:
+            child.disabled = True
+
+    async def on_timeout(self) -> None:
+        self.disable_all()
 
 
-class MinorityVoteDMView:
-    def __init__(self, options, round_number, table_idx, game, results):
-        self.items = {opt: False for opt in options}
-        self._options = options
-        self._round_number = round_number
-        self._table_idx = table_idx
-        self._game = game
+class MinorityVoteDMView(discord.ui.View):
+
+    def __init__(self, options: list, results: dict, pid: int):
+        super().__init__(timeout=30.0)
+        self._results = results
+        self._pid = pid
+        self._voted = False
+        for opt in options:
+            self.add_item(MinorityVoteDMButton(opt, pid, results))
+
+    def disable_all(self) -> None:
+        for child in self.children:
+            child.disabled = True
+
+
+class MinorityVoteDMButton(discord.ui.Button):
+
+    def __init__(self, label: str, pid: int, results: dict):
+        super().__init__(label=label, style=discord.ButtonStyle.secondary)
+        self._opt_label = label
+        self._pid = pid
         self._results = results
 
-    async def handle_vote(self, pid, answer):
-        self._results[pid] = answer
+    async def callback(self, interaction: discord.Interaction) -> None:
+        if interaction.user.id != self._pid:
+            await interaction.response.send_message("This isn't your ballot.", ephemeral=True)
+            return
+        if self._pid in self._results:
+            await interaction.response.send_message("You already voted!", ephemeral=True)
+            return
+        self._results[self._pid] = self._opt_label
+        self.disabled = True
+        await interaction.response.send_message("✅ Vote recorded!", ephemeral=True)
 
 
 def calculate_majority(options, results):

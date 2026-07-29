@@ -51,6 +51,15 @@ class HelpCog(commands.Cog):
         )
 
         embed.add_field(
+            name="In-Game Commands",
+            value=(
+                "**The Trust Game:** `/ask @player question [tt:bool]` — Ask a player about your card\n"
+                "Most voting/guessing is done via **buttons and dropdowns** in DMs."
+            ),
+            inline=False,
+        )
+
+        embed.add_field(
             name="Admin Commands",
             value="`/ping` — Check bot latency\n`/sync` — Sync slash commands",
             inline=False,

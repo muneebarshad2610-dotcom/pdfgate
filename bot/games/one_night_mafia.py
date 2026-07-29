@@ -1,6 +1,8 @@
 import random
 import asyncio
 
+import discord
+
 from bot.engine.base import BaseGame
 from bot.engine.modes import GameMode
 from bot.games.mafia_roles import build_deck, ROLE_ORDER, evaluate_winner
@@ -298,12 +300,18 @@ class OneNightMafia(BaseGame):
             user = self.session.bot.get_user(pid) if self.session.bot else None
             if user:
                 try:
+                    targets = {
+                        p: self.session.state.players.get(str(p))
+                        for p in self.session.state.player_order
+                        if p != pid and not self.session.state.players.get(str(p), {}).eliminated
+                    }
                     await user.send(
                         embed={
                             "title": "Vote Now",
                             "description": "Who do you think is the Mafia? Your vote is final.",
                             "color": 0xFEE75C,
-                        }
+                        },
+                        view=MafiaVoteView(targets=targets, game=self),
                     )
                 except Exception:
                     pass
@@ -313,6 +321,11 @@ class OneNightMafia(BaseGame):
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":
                 return
+            if remaining % 10 == 0 and channel:
+                try:
+                    await channel.send(f"⏱ {remaining}s remaining for voting")
+                except Exception:
+                    pass
             await asyncio.sleep(1)
 
         if channel:
@@ -356,7 +369,7 @@ class OneNightMafia(BaseGame):
             embed={
                 "title": "Voting Results",
                 "description": f"**Voted out:** {voted_name}\n\n**Winner:** {scoring['winner_name']}",
-                "color": 0x57F287,
+                "color": 0x808080,
                 "fields": [
                     {"name": "Role Reveal", "value": roles_reveal, "inline": False},
                     {"name": "Center Cards", "value": center_reveal, "inline": False},
@@ -410,7 +423,7 @@ class OneNightMafia(BaseGame):
                 embed={
                     "title": "One Night Mafia — Final Scores",
                     "description": lines,
-                    "color": 0x57F287,
+                    "color": 0x808080,
                 }
             )
 
@@ -419,6 +432,44 @@ class OneNightMafia(BaseGame):
             return False
         self._votes[voter_id] = target_id
         return True
+
+
+class MafiaVoteSelect(discord.ui.Select):
+
+    def __init__(self, targets: dict):
+        options = [
+            discord.SelectOption(label=p.display_name, value=str(pid))
+            for pid, p in targets.items()
+        ]
+        super().__init__(
+            placeholder="Who is the mafia?",
+            options=options,
+            min_values=1,
+            max_values=1,
+        )
+        self._has_voted = set()
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        view: MafiaVoteView = self.view
+        pid = interaction.user.id
+        if pid in self._has_voted:
+            await interaction.response.send_message("You already voted!", ephemeral=True)
+            return
+        target_id = int(self.values[0])
+        if view.game.record_vote(pid, target_id):
+            self._has_voted.add(pid)
+            self.disabled = True
+            await interaction.response.send_message("✅ Vote recorded!", ephemeral=True)
+        else:
+            await interaction.response.send_message("You cannot vote.", ephemeral=True)
+
+
+class MafiaVoteView(discord.ui.View):
+
+    def __init__(self, targets: dict, game):
+        super().__init__(timeout=60.0)
+        self.game = game
+        self.add_item(MafiaVoteSelect(targets))
 
 
 def get_team_color(team):

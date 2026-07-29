@@ -2,6 +2,8 @@ import random
 import asyncio
 import json
 
+import discord
+
 from bot.engine.base import BaseGame
 from bot.config import QUESTIONS_DIR
 from bot.engine.modes import GameMode
@@ -98,7 +100,7 @@ class TriviaChallenge(BaseGame):
                             "description": text,
                             "color": 0x57F287,
                         },
-                        view=TriviaAnswerView(options, round_number, self, correct_idx),
+                        view=TriviaAnswerView(options=options, game=self, pid=pid),
                     )
                 except Exception:
                     pass
@@ -109,6 +111,11 @@ class TriviaChallenge(BaseGame):
         for remaining_time in range(timeout, 0, -1):
             if self.session.status != "in_progress":
                 return
+            if remaining_time % 10 == 0 and channel:
+                try:
+                    await channel.send(f"⏱ {remaining_time}s remaining")
+                except Exception:
+                    pass
             await asyncio.sleep(1)
 
         for pid in remaining:
@@ -197,7 +204,7 @@ class TriviaChallenge(BaseGame):
             embed = {
                 "title": "Trivia Challenge — Final Standings",
                 "description": "\n".join(lines) if lines else "No scores",
-                "color": 0x57F287,
+                "color": 0x808080,
                 "fields": [],
             }
 
@@ -228,21 +235,35 @@ class TriviaChallenge(BaseGame):
                     )
 
 
-class TriviaAnswerView:
-    def __init__(self, options, round_number, game, correct_idx):
-        self.items = {}
-        self._options = options
-        self._round_number = round_number
-        self._game = game
-        self._correct_idx = correct_idx
-        self._disabled = False
+class TriviaAnswerButton(discord.ui.Button):
 
-    async def handle_answer(self, pid, answer_idx):
-        if self._disabled:
+    def __init__(self, label: str, idx: int):
+        super().__init__(label=label, style=discord.ButtonStyle.secondary)
+        self._answer_idx = idx
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        view: TriviaAnswerView = self.view
+        pid = interaction.user.id
+        if interaction.user.id != view._pid:
+            await interaction.response.send_message("This isn't your question.", ephemeral=True)
             return
-        if pid not in self._game._round_answers:
-            self._game._round_answers[pid] = answer_idx
+        if pid in view._game._round_answers:
+            await interaction.response.send_message("Already answered!", ephemeral=True)
+            return
+        view._game._round_answers[pid] = self._answer_idx
+        self.disabled = True
+        await interaction.response.send_message("✅ Answer recorded!", ephemeral=True)
 
-    def disable_all(self):
-        self._disabled = True
-        self.items = {}
+
+class TriviaAnswerView(discord.ui.View):
+
+    def __init__(self, options: list, game, pid: int):
+        super().__init__(timeout=20.0)
+        self._game = game
+        self._pid = pid
+        for i, opt in enumerate(options):
+            self.add_item(TriviaAnswerButton(opt, i))
+
+    def disable_all(self) -> None:
+        for child in self.children:
+            child.disabled = True

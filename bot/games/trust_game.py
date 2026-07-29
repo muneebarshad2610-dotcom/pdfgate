@@ -1,6 +1,8 @@
 import random
 import asyncio
 
+import discord
+
 from bot.engine.base import BaseGame
 from bot.engine.modes import GameMode
 
@@ -114,6 +116,11 @@ class TrustGame(BaseGame):
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":
                 return
+            if remaining % 10 == 0 and channel:
+                try:
+                    await channel.send(f"⏱ {remaining}s remaining in questioning phase")
+                except Exception:
+                    pass
             await asyncio.sleep(1)
 
         if channel:
@@ -306,9 +313,10 @@ class TrustGame(BaseGame):
                     await user.send(
                         embed={
                             "title": "Guess Your Card",
-                            "description": "Reply with: `/guess <card>`\n\nAvailable cards:\n" + ", ".join(CARD_NAMES),
+                            "description": "Select your card from the dropdown!",
                             "color": 0xFEE75C,
-                        }
+                        },
+                        view=TrustGuessView(cards=CARD_NAMES, game=self, pid=pid),
                     )
                 except Exception:
                     pass
@@ -319,6 +327,11 @@ class TrustGame(BaseGame):
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":
                 return
+            if remaining % 10 == 0 and channel:
+                try:
+                    await channel.send(f"⏱ {remaining}s remaining in guess phase")
+                except Exception:
+                    pass
             await asyncio.sleep(1)
 
         await self._reveal_and_score(round_number, channel)
@@ -390,7 +403,7 @@ class TrustGame(BaseGame):
             embed = {
                 "title": "The Trust Game — Final Standings",
                 "description": "\n".join(lines) if lines else "No scores",
-                "color": 0x57F287,
+                "color": 0x808080,
             }
 
             if self.session.mode == GameMode.CAMPAIGN:
@@ -418,3 +431,39 @@ class TrustGame(BaseGame):
                             "color": 0xED4245,
                         }
                     )
+
+
+class TrustGuessSelect(discord.ui.Select):
+
+    def __init__(self, cards: list, pid: int):
+        options = [discord.SelectOption(label=card, value=card) for card in cards]
+        super().__init__(
+            placeholder="Select your card...",
+            options=options,
+            min_values=1,
+            max_values=1,
+        )
+        self._pid = pid
+        self._guessed = False
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        if interaction.user.id != self._pid:
+            await interaction.response.send_message("Not your turn!", ephemeral=True)
+            return
+        if self._guessed:
+            await interaction.response.send_message("Already guessed!", ephemeral=True)
+            return
+        card = self.values[0]
+        view: TrustGuessView = self.view
+        await view.game.handle_guess(self._pid, card)
+        self._guessed = True
+        self.disabled = True
+        await interaction.response.send_message(f"✅ Guessed **{card}**", ephemeral=True)
+
+
+class TrustGuessView(discord.ui.View):
+
+    def __init__(self, cards: list, game, pid: int):
+        super().__init__(timeout=30.0)
+        self.game = game
+        self.add_item(TrustGuessSelect(cards, pid))
