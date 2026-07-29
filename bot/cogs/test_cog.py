@@ -1,8 +1,10 @@
 import random
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 
+from bot.colors import BLUE_PRIMARY
 from bot.cogs.session_cog import session_manager
 from bot.games.trivia import load_trivia_questions
 from bot.games.majority_rules import load_questions
@@ -18,7 +20,7 @@ class TestCog(commands.GroupCog, group_name="test"):
         embed = discord.Embed(
             title="Test Embed",
             description="This is a sample embed to verify embed formatting and colors.",
-            color=0xFFD84D,
+            color=BLUE_PRIMARY,
         )
         embed.add_field(name="Field 1", value="Some value here", inline=True)
         embed.add_field(name="Field 2", value="Another value", inline=True)
@@ -66,7 +68,7 @@ class TestCog(commands.GroupCog, group_name="test"):
             embed = discord.Embed(
                 title="Trivia Question",
                 description=f"**{q['text']}**\n\n{opts}",
-                color=0xFFD84D,
+                color=BLUE_PRIMARY,
             )
             embed.add_field(name="Category", value=q.get("category", "General"), inline=True)
             embed.add_field(name="Answer", value=f"||{q['options'][q['answer']]}||", inline=True)
@@ -80,7 +82,7 @@ class TestCog(commands.GroupCog, group_name="test"):
             embed = discord.Embed(
                 title="Majority Rules Question",
                 description=f"**{q['text']}**\n\n{opts}",
-                color=0x4A7BFF,
+                color=BLUE_PRIMARY,
             )
 
         await interaction.response.send_message(embed=embed)

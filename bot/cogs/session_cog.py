@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from bot.colors import BLUE_PRIMARY, GREEN, RED
 from bot.engine.session import SessionManager
 from bot.engine.modes import GameMode, mode_from_string
 from bot.errors import (
@@ -51,7 +52,7 @@ class SessionCog(commands.Cog):
         embed = discord.Embed(
             title="Session Created",
             description=f"**Mode:** {game_mode.value.title()}\n**Host:** {interaction.user.mention}\n**Players:** 0/{session.min_players}",
-            color=discord.Color.blue(),
+            color=BLUE_PRIMARY,
         )
         embed.add_field(name="Session ID", value=session.id, inline=False)
         embed.add_field(name="Next Steps", value="Use `/join` to enter the game\nHost uses `/start` to begin", inline=False)
@@ -70,7 +71,7 @@ class SessionCog(commands.Cog):
             embed = discord.Embed(
                 title="Player Joined",
                 description=f"{interaction.user.mention} has joined the game! ({session.player_count}/{session.min_players})",
-                color=discord.Color.green(),
+                color=GREEN,
             )
             if session.player_count >= session.min_players:
                 embed.add_field(name="Ready to Start", value="The host can now use `/start` to begin!", inline=False)
@@ -109,7 +110,7 @@ class SessionCog(commands.Cog):
             embed = discord.Embed(
                 title="Game Started!",
                 description=f"The game has begun in **{session.mode.value.title()}** mode with {session.player_count} players!",
-                color=discord.Color.green(),
+                color=GREEN,
             )
             await interaction.response.send_message(embed=embed)
 
@@ -136,7 +137,7 @@ class SessionCog(commands.Cog):
         embed = discord.Embed(
             title="Session Ended",
             description="The game session has been ended by the host.",
-            color=discord.Color.red(),
+            color=RED,
         )
         await interaction.response.send_message(embed=embed)
 
@@ -149,7 +150,7 @@ class SessionCog(commands.Cog):
 
         embed = discord.Embed(
             title="Session Status",
-            color=discord.Color.blue(),
+            color=BLUE_PRIMARY,
         )
         embed.add_field(name="Mode", value=session.mode.value.title(), inline=True)
         embed.add_field(name="Status", value=session.status.replace("_", " ").title(), inline=True)

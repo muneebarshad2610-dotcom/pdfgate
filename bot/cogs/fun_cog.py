@@ -1,7 +1,10 @@
 import random
+
 import discord
 from discord import app_commands
 from discord.ext import commands
+
+from bot.colors import BLUE_PRIMARY
 
 
 class FunCog(commands.GroupCog, group_name="fun"):
@@ -61,12 +64,44 @@ class FunCog(commands.GroupCog, group_name="fun"):
         user = user or interaction.user
         embed = discord.Embed(
             title=f"{user.display_name}'s Avatar",
-            color=0x00C9A7,
+            color=BLUE_PRIMARY,
         )
         embed.set_image(url=user.display_avatar.url)
         embed.add_field(name="PNG", value=f"[Link]({user.display_avatar.with_format('png').url})", inline=True)
         embed.add_field(name="JPEG", value=f"[Link]({user.display_avatar.with_format('jpeg').url})", inline=True)
         embed.add_field(name="WEBP", value=f"[Link]({user.display_avatar.with_format('webp').url})", inline=True)
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="8ball", description="Ask the magic 8-ball a question")
+    @app_commands.describe(question="Your yes/no question")
+    async def eight_ball(self, interaction: discord.Interaction, question: str):
+        responses = [
+            "It is certain.", "It is decidedly so.", "Without a doubt.",
+            "Yes — definitely.", "You may rely on it.", "As I see it, yes.",
+            "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.",
+            "Reply hazy, try again.", "Ask again later.", "Better not tell you now.",
+            "Cannot predict now.", "Concentrate and ask again.",
+            "Don't count on it.", "My reply is no.", "My sources say no.",
+            "Outlook not so good.", "Very doubtful.",
+        ]
+        embed = discord.Embed(
+            title="<a:91490animatedarrowblue:1531868497242620014> Magic 8-Ball",
+            description=f"**{question}**\n\n{random.choice(responses)}",
+            color=BLUE_PRIMARY,
+        )
+        embed.set_footer(text=f"Asked by {interaction.user.display_name}")
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="rate", description="Rate something on a scale of 1-10")
+    @app_commands.describe(thing="The thing to rate")
+    async def rate(self, interaction: discord.Interaction, thing: str):
+        score = random.randint(1, 10)
+        bar = "🟦" * score + "⬛" * (10 - score)
+        embed = discord.Embed(
+            title="Rating",
+            description=f"I rate **{thing}** a **{score}/10**\n{bar}",
+            color=BLUE_PRIMARY,
+        )
         await interaction.response.send_message(embed=embed)
 
 

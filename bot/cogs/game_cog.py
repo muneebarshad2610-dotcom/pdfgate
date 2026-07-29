@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from bot.colors import BLUE_PRIMARY
 from bot.engine.modes import GameMode
 from bot.cogs.session_cog import session_manager
 
@@ -33,7 +34,7 @@ class GameCog(commands.GroupCog, group_name="play"):
         embed = discord.Embed(
             title=f"{game_type.replace('_', ' ').title()} — {mode.value.title()}",
             description=f"Game created by {interaction.user.mention}\nUse `/join` to enter!\nHost uses `/start` to begin. Need 10 players.",
-            color=discord.Color.blue(),
+            color=BLUE_PRIMARY,
         )
         embed.add_field(name="Players", value=f"1/10", inline=True)
 

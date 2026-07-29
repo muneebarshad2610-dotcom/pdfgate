@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from bot.colors import BLUE_PRIMARY
 from bot.config import config
 
 
@@ -102,7 +103,7 @@ class AdminCog(commands.Cog):
             embed = discord.Embed(
                 title=f"Leaderboard — {mode.title()}",
                 description="\n".join(lines),
-                color=0xFFD84D,
+                color=BLUE_PRIMARY,
             )
             embed.set_footer(text=f"Page {start // per_page + 1}/{(len(lb) - 1) // per_page + 1}")
             pages.append(embed)

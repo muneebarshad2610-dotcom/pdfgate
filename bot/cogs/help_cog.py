@@ -2,6 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from bot.colors import BLUE_PRIMARY
+
 
 class HelpCog(commands.Cog):
 
@@ -15,7 +17,7 @@ class HelpCog(commands.Cog):
         page1 = discord.Embed(
             title="House of Games — Help (1/2)",
             description="A competitive multi-game show experience for Discord.",
-            color=discord.Color.blue(),
+            color=BLUE_PRIMARY,
         )
         page1.add_field(
             name="Session Commands",
@@ -53,7 +55,7 @@ class HelpCog(commands.Cog):
 
         page2 = discord.Embed(
             title="House of Games — Help (2/2)",
-            color=discord.Color.blue(),
+            color=BLUE_PRIMARY,
         )
         page2.add_field(
             name="In-Game Commands",
@@ -70,7 +72,9 @@ class HelpCog(commands.Cog):
                 "`/fun flip` — Flip a coin\n"
                 "`/fun choose <options>` — Pick from a list\n"
                 "`/fun random <min> <max>` — Random number\n"
-                "`/fun avatar [user]` — Get avatar"
+                "`/fun avatar [user]` — Get avatar\n"
+                "`/fun 8ball <question>` — Magic 8-ball\n"
+                "`/fun rate <thing>` — Rate something"
             ),
             inline=False,
         )
@@ -81,6 +85,7 @@ class HelpCog(commands.Cog):
                 "`/dev permissions` — Check your perms\n"
                 "`/dev user_info [user]` — User details\n"
                 "`/dev server_info` — Server details\n"
+                "`/dev uptime` — Bot uptime\n"
                 "`/test embed` — Test embed formatting\n"
                 "`/test fill` — Fill session with test players\n"
                 "`/test question <game>` — Show a random question"
@@ -89,7 +94,7 @@ class HelpCog(commands.Cog):
         )
         page2.add_field(
             name="Admin Commands",
-            value="`/ping` — Check bot latency\n`/sync [dev/global]` — Sync slash commands\n`/force_end` — End all sessions",
+            value="`/ping` — Check bot latency\n`/leaderboard [mode]` — View rankings\n`/sync [dev/global]` — Sync slash commands\n`/force_end` — End all sessions",
             inline=False,
         )
 
