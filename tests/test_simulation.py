@@ -675,12 +675,12 @@ class TestSimBugReproducers:
         assert (100, s.id) in lb._session_cache  # should have been cleared
 
     def test_84_C_GAMES_2_status_hardcodes_emojis(self):
-        """C-GAMES-2: status command hardcodes emoji IDs."""
+        """C-GAMES-2: status command now uses config.emojis.*."""
         import ast, inspect
         from bot.cogs import session_cog
         source = inspect.getsource(session_cog)
-        # Check that the hardcoded emoji IDs appear in the source
-        assert "1531870116587900928" in source or "1531870110896226344" in source
+        assert "config.emojis.heart" in source and "config.emojis.asterisk" in source
+        assert "1531870116587900928" not in source and "1531870110896226344" not in source
 
     def test_85_C_DOCS_1_readme_missing_game_param(self):
         """C-DOCS-1: README shows /create [mode] without [game]."""

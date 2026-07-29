@@ -1,8 +1,11 @@
+import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 from bot.colors import BLUE_PRIMARY, GREEN, RED
+from bot.config import config
 from bot.engine.session import SessionManager
 from bot.engine.modes import GameMode, mode_from_string
 from bot.errors import (
@@ -13,6 +16,8 @@ from bot.games.majority_rules import MajorityRules
 from bot.games.one_night_mafia import OneNightMafia
 from bot.games.trivia import TriviaChallenge
 from bot.games.trust_game import TrustGame
+
+log = logging.getLogger("house_of_games.session")
 
 session_manager = SessionManager()
 
@@ -123,7 +128,19 @@ class SessionCog(commands.Cog):
 
             game = self._create_game(session)
             if game:
-                await game.run()
+                session.game = game
+                try:
+                    await game.run()
+                except Exception:
+                    log.exception("Game %s crashed in channel %s", session.game_type, session.channel_id)
+                    embed = discord.Embed(
+                        title="Game Crashed",
+                        description="An error occurred while running the game. The session has been ended.",
+                        color=RED,
+                    )
+                    await interaction.channel.send(embed=embed)
+                finally:
+                    session_manager.end_session(session.id)
         except NotSessionHostError:
             await interaction.response.send_message("Only the host can start the game.", ephemeral=True)
         except NotEnoughPlayersError as e:
@@ -166,7 +183,7 @@ class SessionCog(commands.Cog):
 
         if session.state.player_order:
             players_list = "\n".join(
-                f"{'<:205150heart951:1531870116587900928>' if not p.eliminated else '<:73190blueasterisk:1531870110896226344>'} {p.display_name} — {p.score} pts"
+                f"{config.emojis.heart if not p.eliminated else config.emojis.asterisk} {p.display_name} — {p.score} pts"
                 for p in session.state.players.values()
             )
             embed.add_field(name="Players", value=players_list, inline=False)

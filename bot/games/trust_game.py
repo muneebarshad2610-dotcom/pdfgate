@@ -5,6 +5,8 @@ import discord
 
 from bot.engine.base import BaseGame
 from bot.engine.modes import GameMode
+from bot.colors import BLUE_PRIMARY, GREEN, RED, GREY, AMBER
+from bot.config import config
 
 SUITS = ["hearts", "diamonds", "clubs", "spades"]
 SUIT_SYMBOLS = {"hearts": "♥", "diamonds": "♦", "clubs": "♣", "spades": "♠"}
@@ -51,31 +53,27 @@ class TrustGame(BaseGame):
 
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
         if channel:
-            await channel.send(
-                embed={
-                    "title": "The Trust Game — Starting!",
-                    "description": "Cards have been dealt. Each player sees **everyone else's card** but not their own.\n\nUse your questions wisely to figure out your card!",
-                    "color": 0x5865F2,
-                    "fields": [
-                        {"name": "Players", "value": str(len(player_ids)), "inline": True},
-                        {"name": "Center Cards", "value": "2 (hidden)", "inline": True},
-                        {"name": "Rounds", "value": "8", "inline": True},
-                    ],
-                }
+            embed = discord.Embed(
+                title="The Trust Game — Starting!",
+                description="Cards have been dealt. Each player sees **everyone else's card** but not their own.\n\nUse your questions wisely to figure out your card!",
+                color=BLUE_PRIMARY,
             )
+            embed.add_field(name="Players", value=str(len(player_ids)), inline=True)
+            embed.add_field(name="Center Cards", value="2 (hidden)", inline=True)
+            embed.add_field(name="Rounds", value="8", inline=True)
+            await channel.send(embed=embed)
 
         for pid in player_ids:
             user = self.session.bot.get_user(pid) if self.session.bot else None
             if user:
                 my_card = self._player_cards.get(str(pid))
                 try:
-                    await user.send(
-                        embed={
-                            "title": "Your Card is Hidden",
-                            "description": f"Your card has been dealt face-down. Everyone else can see it — but you can't!\n\nWhen each round begins, you'll see the cards of all other players in this DM.",
-                            "color": 0xFEE75C,
-                        }
+                    embed = discord.Embed(
+                        title="Your Card is Hidden",
+                        description="Your card has been dealt face-down. Everyone else can see it — but you can't!\n\nWhen each round begins, you'll see the cards of all other players in this DM.",
+                        color=AMBER,
                     )
+                    await user.send(embed=embed)
                 except Exception:
                     pass
 
@@ -92,16 +90,13 @@ class TrustGame(BaseGame):
         active = [p for p in self.session.state.player_order if not self.session.state.players.get(str(p), {}).eliminated]
 
         if channel:
-            await channel.send(
-                embed={
-                    "title": f"Round {round_number}/8 — Questioning Phase",
-                    "description": "You have **90 seconds** to ask up to **3 questions** about your card.\nUse your **Truth Token** on one question for a guaranteed truthful answer!",
-                    "color": 0x5865F2,
-                    "fields": [
-                        {"name": "Active Players", "value": str(len(active)), "inline": True},
-                    ],
-                }
+            embed = discord.Embed(
+                title=f"Round {round_number}/8 — Questioning Phase",
+                description="You have **90 seconds** to ask up to **3 questions** about your card.\nUse your **Truth Token** on one question for a guaranteed truthful answer!",
+                color=BLUE_PRIMARY,
             )
+            embed.add_field(name="Active Players", value=str(len(active)), inline=True)
+            await channel.send(embed=embed)
 
         for pid in active:
             self._questions_remaining[pid] = 3
@@ -118,7 +113,7 @@ class TrustGame(BaseGame):
             if self.session.status != "in_progress":
                 return
             if remaining % 10 == 0 and channel:
-                text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining}s** remaining in questioning phase"
+                text = f"{config.emojis.timer} **{remaining}s** remaining in questioning phase"
                 try:
                     if countdown_msg:
                         await countdown_msg.edit(content=text)
@@ -129,13 +124,12 @@ class TrustGame(BaseGame):
             await asyncio.sleep(1)
 
         if channel:
-            await channel.send(
-                embed={
-                    "title": "<a:91490animatedarrowblue:1531868497242620014> Time's Up!",
-                    "description": "Questioning phase is over. Moving to guesses...",
-                    "color": 0xFEE75C,
-                }
+            embed = discord.Embed(
+                title=f"{config.emojis.timer} Time's Up!",
+                description="Questioning phase is over. Moving to guesses...",
+                color=AMBER,
             )
+            await channel.send(embed=embed)
 
     async def _send_table_view(self, pid, round_number, user):
         my_card = self._player_cards.get(str(pid))
@@ -153,27 +147,23 @@ class TrustGame(BaseGame):
         tt_status = "Available" if not self._used_truth_token.get(pid) else "Used"
 
         try:
-            await user.send(
-                embed={
-                    "title": f"Round {round_number} — Your View",
-                    "description": "These are the cards visible to you:",
-                    "color": 0x57F287,
-                    "fields": [
-                        {"name": "Other Players' Cards", "value": "\n".join(others) if others else "No other players", "inline": False},
-                        {"name": "Your Card", "value": "**??? (face down)**", "inline": True},
-                        {"name": "Questions Left", "value": str(remaining_q), "inline": True},
-                        {"name": "Truth Token", "value": tt_status, "inline": True},
-                    ],
-                }
+            embed = discord.Embed(
+                title=f"Round {round_number} — Your View",
+                description="These are the cards visible to you:",
+                color=GREEN,
             )
+            embed.add_field(name="Other Players' Cards", value="\n".join(others) if others else "No other players", inline=False)
+            embed.add_field(name="Your Card", value="**??? (face down)**", inline=True)
+            embed.add_field(name="Questions Left", value=str(remaining_q), inline=True)
+            embed.add_field(name="Truth Token", value=tt_status, inline=True)
+            await user.send(embed=embed)
             if remaining_q > 0:
-                await user.send(
-                    embed={
-                        "title": "Ask a Question",
-                        "description": "Type your question using:\n`/ask @Player your question here [tt]`\n\nAdd `tt` at the end to use your Truth Token.\n\nExample: `/ask @Alice Is my card a heart? tt`",
-                        "color": 0xFEE75C,
-                    },
+                embed2 = discord.Embed(
+                    title="Ask a Question",
+                    description="Type your question using:\n`/ask @Player your question here [tt]`\n\nAdd `tt` at the end to use your Truth Token.\n\nExample: `/ask @Alice Is my card a heart? tt`",
+                    color=AMBER,
                 )
+                await user.send(embed=embed2)
         except Exception:
             pass
 
@@ -184,7 +174,8 @@ class TrustGame(BaseGame):
             user = self.session.bot.get_user(pid) if self.session.bot else None
             if user:
                 try:
-                    await user.send(embed={"title": "No Questions Left", "description": "You've used all 3 questions for this round.", "color": 0xED4245})
+                    embed = discord.Embed(title="No Questions Left", description="You've used all 3 questions for this round.", color=RED)
+                    await user.send(embed=embed)
                 except Exception:
                     pass
             return
@@ -193,7 +184,8 @@ class TrustGame(BaseGame):
             user = self.session.bot.get_user(pid) if self.session.bot else None
             if user:
                 try:
-                    await user.send(embed={"title": "Truth Token Used", "description": "You've already used your Truth Token this round.", "color": 0xED4245})
+                    embed = discord.Embed(title="Truth Token Used", description="You've already used your Truth Token this round.", color=RED)
+                    await user.send(embed=embed)
                 except Exception:
                     pass
             return
@@ -211,7 +203,8 @@ class TrustGame(BaseGame):
             user = self.session.bot.get_user(pid) if self.session.bot else None
             if user:
                 try:
-                    await user.send(embed={"title": "Player Not Found", "description": f"Could not find a player matching '{target_name}'. Try their display name.", "color": 0xED4245})
+                    embed = discord.Embed(title="Player Not Found", description=f"Could not find a player matching '{target_name}'. Try their display name.", color=RED)
+                    await user.send(embed=embed)
                 except Exception:
                     pass
             return
@@ -229,44 +222,37 @@ class TrustGame(BaseGame):
             answer = self._evaluate_truth_question(question_text, target_card)
             if user:
                 try:
-                    await user.send(
-                        embed={
-                            "title": "Truth Token Answer",
-                            "description": f"Question about {target.display_name}'s card: **{answer}**",
-                            "color": 0x57F287,
-                            "fields": [
-                                {"name": "Your Question", "value": question_text, "inline": False},
-                                {"name": "Truth Token", "value": "Used — <:205150heart951:1531870116587900928> Guaranteed truthful", "inline": False},
-                            ],
-                        }
+                    embed = discord.Embed(
+                        title="Truth Token Answer",
+                        description=f"Question about {target.display_name}'s card: **{answer}**",
+                        color=GREEN,
                     )
+                    embed.add_field(name="Your Question", value=question_text, inline=False)
+                    embed.add_field(name="Truth Token", value=f"Used — {config.emojis.heart} Guaranteed truthful", inline=False)
+                    await user.send(embed=embed)
                 except Exception:
                     pass
         else:
             target_user = self.session.bot.get_user(target_pid) if self.session.bot else None
             if target_user:
                 try:
-                    await target_user.send(
-                        embed={
-                            "title": f"Question from {asker.display_name}",
-                            "description": question_text,
-                            "color": 0xFEE75C,
-                        }
+                    embed = discord.Embed(
+                        title=f"Question from {asker.display_name}",
+                        description=question_text,
+                        color=AMBER,
                     )
+                    await target_user.send(embed=embed)
                 except Exception:
                     pass
             if user:
                 try:
-                    await user.send(
-                        embed={
-                            "title": "Question Sent",
-                            "description": f"Your question has been sent to {target.display_name}. They may answer truthfully or lie.",
-                            "color": 0x57F287,
-                            "fields": [
-                                {"name": "Your Question", "value": question_text, "inline": False},
-                            ],
-                        }
+                    embed = discord.Embed(
+                        title="Question Sent",
+                        description=f"Your question has been sent to {target.display_name}. They may answer truthfully or lie.",
+                        color=GREEN,
                     )
+                    embed.add_field(name="Your Question", value=question_text, inline=False)
+                    await user.send(embed=embed)
                 except Exception:
                     pass
 
@@ -300,13 +286,12 @@ class TrustGame(BaseGame):
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
 
         if channel:
-            await channel.send(
-                embed={
-                    "title": f"Round {round_number}/8 — Guess Phase",
-                    "description": "You have **30 seconds** to guess your card! +3 for a correct guess.",
-                    "color": 0xFEE75C,
-                }
+            embed = discord.Embed(
+                title=f"Round {round_number}/8 — Guess Phase",
+                description="You have **30 seconds** to guess your card! +3 for a correct guess.",
+                color=AMBER,
             )
+            await channel.send(embed=embed)
 
         for pid in self.session.state.player_order:
             player = self.session.state.players.get(str(pid))
@@ -315,14 +300,12 @@ class TrustGame(BaseGame):
             user = self.session.bot.get_user(pid) if self.session.bot else None
             if user:
                 try:
-                    await user.send(
-                        embed={
-                            "title": "Guess Your Card",
-                            "description": "Select your card from the dropdown!",
-                            "color": 0xFEE75C,
-                        },
-                        view=TrustGuessView(cards=CARD_NAMES, game=self, pid=pid),
+                    embed = discord.Embed(
+                        title="Guess Your Card",
+                        description="Select your card from the dropdown!",
+                        color=AMBER,
                     )
+                    await user.send(embed=embed, view=TrustGuessView(cards=CARD_NAMES, game=self, pid=pid))
                 except Exception:
                     pass
 
@@ -334,7 +317,7 @@ class TrustGame(BaseGame):
             if self.session.status != "in_progress":
                 return
             if remaining % 10 == 0 and channel:
-                text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining}s** remaining in guess phase"
+                text = f"{config.emojis.timer} **{remaining}s** remaining in guess phase"
                 try:
                     if countdown_msg:
                         await countdown_msg.edit(content=text)
@@ -363,28 +346,25 @@ class TrustGame(BaseGame):
             if correct:
                 self.session.score_player(pid, 3)
                 round_scoreboard[pid] = 3
-                status = "<:205150heart951:1531870116587900928> Correct! +3"
+                status = f"{config.emojis.heart} Correct! +3"
             elif guess is None:
-                status = "<a:259419darkbluearrow:1531868494851739792> No guess"
+                status = f"{config.emojis.arrow} No guess"
                 round_scoreboard[pid] = 0
             else:
-                status = f"<:73190blueasterisk:1531870110896226344> Guessed {guess}"
+                status = f"{config.emojis.asterisk} Guessed {guess}"
                 round_scoreboard[pid] = 0
             lines.append(f"{player.display_name}: **{actual}** — {status}")
 
         center_display = ", ".join(self._center_cards)
 
         if channel:
-            await channel.send(
-                embed={
-                    "title": f"Round {round_number} — Results",
-                    "description": "\n".join(lines),
-                    "color": 0x57F287,
-                    "fields": [
-                        {"name": "Center Cards", "value": center_display, "inline": False},
-                    ],
-                }
+            embed = discord.Embed(
+                title=f"Round {round_number} — Results",
+                description="\n".join(lines),
+                color=GREEN,
             )
+            embed.add_field(name="Center Cards", value=center_display, inline=False)
+            await channel.send(embed=embed)
 
         if self.session.mode == GameMode.CAMPAIGN:
             for pid, pts in round_scoreboard.items():
@@ -407,21 +387,19 @@ class TrustGame(BaseGame):
         if channel:
             lines = []
             for i, p in enumerate(standings):
-                prefix = "<a:2434darkbluecrown:1531870115052916866>" if i == 0 else f"{i + 1}."
+                prefix = f"{config.emojis.crown}" if i == 0 else f"{i + 1}."
                 lines.append(f"{prefix} {p.display_name} — **{p.score} pts**")
 
-            embed = {
-                "title": "The Trust Game — Final Standings",
-                "description": "\n".join(lines) if lines else "No scores",
-                "color": 0x808080,
-            }
+            embed = discord.Embed(
+                title="The Trust Game — Final Standings",
+                description="\n".join(lines) if lines else "No scores",
+                color=GREY,
+            )
 
             if self.session.mode == GameMode.CAMPAIGN:
                 top2 = standings[:2]
                 winners = ", ".join(p.display_name for p in top2)
-                embed["fields"] = [
-                    {"name": "Advancing", "value": winners, "inline": False},
-                ]
+                embed.add_field(name="Advancing", value=winners, inline=False)
 
             await channel.send(embed=embed)
 
@@ -434,13 +412,12 @@ class TrustGame(BaseGame):
 
                 if channel:
                     elim_names = ", ".join(p.display_name for p in eliminated)
-                    await channel.send(
-                        embed={
-                            "title": "Eliminations",
-                            "description": f"{elim_names} {'are' if len(eliminated) > 1 else 'is'} eliminated from the house.",
-                            "color": 0xED4245,
-                        }
+                    embed = discord.Embed(
+                        title="Eliminations",
+                        description=f"{elim_names} {'are' if len(eliminated) > 1 else 'is'} eliminated from the house.",
+                        color=RED,
                     )
+                    await channel.send(embed=embed)
 
 
 class TrustGuessSelect(discord.ui.Select):
@@ -468,7 +445,7 @@ class TrustGuessSelect(discord.ui.Select):
         await view.game.handle_guess(self._pid, card)
         self._guessed = True
         self.disabled = True
-        await interaction.response.send_message(f"<:205150heart951:1531870116587900928> Guessed **{card}**", ephemeral=True)
+        await interaction.response.send_message(f"{config.emojis.heart} Guessed **{card}**", ephemeral=True)
 
 
 class TrustGuessView(discord.ui.View):

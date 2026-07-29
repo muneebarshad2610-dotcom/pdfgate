@@ -95,7 +95,7 @@ class AdminCog(commands.Cog):
             chunk = lb[start:start + per_page]
             lines = []
             for i, entry in enumerate(chunk, start=start + 1):
-                prefix = "<a:2434darkbluecrown:1531870115052916866>" if i == 1 else f"{i}."
+                prefix = str(config.emojis.crown) if i == 1 else f"{i}."
                 pts = entry.get("campaign_points", entry.get("session_points", 0))
                 name = entry.get("display_name", "Unknown")
                 lines.append(f"{prefix} {name} — **{pts} pts**")

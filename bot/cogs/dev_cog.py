@@ -5,6 +5,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.colors import BLUE_PRIMARY, TEAL
+from bot.config import config
 
 
 class DevCog(commands.GroupCog, group_name="dev"):
@@ -22,7 +23,7 @@ class DevCog(commands.GroupCog, group_name="dev"):
     async def permissions(self, interaction: discord.Interaction):
         perms = interaction.channel.permissions_for(interaction.user)
         flagged = [name.replace("_", " ").title() for name, val in perms if val]
-        lines = "\n".join(f"<:73190blueasterisk:1531870110896226344> {p}" for p in flagged[:20])
+        lines = "\n".join(f"{config.emojis.asterisk} {p}" for p in flagged[:20])
         embed = discord.Embed(
             title="Your Permissions",
             description=lines or "No special permissions",

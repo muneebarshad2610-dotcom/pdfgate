@@ -7,6 +7,8 @@ import discord
 from bot.engine.base import BaseGame
 from bot.config import QUESTIONS_DIR
 from bot.engine.modes import GameMode
+from bot.colors import BLUE_PRIMARY, GREEN, RED, GREY
+from bot.config import config
 
 
 def load_trivia_questions():
@@ -46,17 +48,14 @@ class TriviaChallenge(BaseGame):
 
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
         if channel:
-            await channel.send(
-                embed={
-                    "title": "Trivia Challenge — Starting!",
-                    "description": f"**{len(self.active_players)} players** — Last player standing wins!\n\nEach correct answer = **+1 pt**. Bottom 2 eliminated each round.",
-                    "color": 0x5865F2,
-                    "fields": [
-                        {"name": "Questions Available", "value": str(len(self._questions)), "inline": True},
-                        {"name": "Time per Question", "value": "20 seconds", "inline": True},
-                    ],
-                }
+            embed = discord.Embed(
+                title="Trivia Challenge — Starting!",
+                description=f"**{len(self.active_players)} players** — Last player standing wins!\n\nEach correct answer = **+1 pt**. Bottom 2 eliminated each round.",
+                color=BLUE_PRIMARY,
             )
+            embed.add_field(name="Questions Available", value=str(len(self._questions)), inline=True)
+            embed.add_field(name="Time per Question", value="20 seconds", inline=True)
+            await channel.send(embed=embed)
 
     async def on_round(self, round_number: int):
         question = self._questions[round_number - 1]
@@ -73,19 +72,15 @@ class TriviaChallenge(BaseGame):
         self._round_answers = {}
 
         if channel:
-            fields = [
-                {"name": "Category", "value": question.get("category", "General"), "inline": True},
-                {"name": "Players Remaining", "value": str(len(remaining)), "inline": True},
-                {"name": "Time", "value": "20 seconds", "inline": True},
-            ]
-            await channel.send(
-                embed={
-                    "title": f"Round {round_number} — Trivia Challenge",
-                    "description": text,
-                    "color": 0x5865F2,
-                    "fields": fields,
-                }
+            embed = discord.Embed(
+                title=f"Round {round_number} — Trivia Challenge",
+                description=text,
+                color=BLUE_PRIMARY,
             )
+            embed.add_field(name="Category", value=question.get("category", "General"), inline=True)
+            embed.add_field(name="Players Remaining", value=str(len(remaining)), inline=True)
+            embed.add_field(name="Time", value="20 seconds", inline=True)
+            await channel.send(embed=embed)
 
         for pid in remaining:
             player = self.session.state.players.get(str(pid))
@@ -95,11 +90,11 @@ class TriviaChallenge(BaseGame):
             if user:
                 try:
                     await user.send(
-                        embed={
-                            "title": f"Round {round_number} — Your Answer",
-                            "description": text,
-                            "color": 0x57F287,
-                        },
+                        embed=discord.Embed(
+                            title=f"Round {round_number} — Your Answer",
+                            description=text,
+                            color=GREEN,
+                        ),
                         view=TriviaAnswerView(options=options, game=self, pid=pid),
                     )
                 except Exception:
@@ -113,7 +108,7 @@ class TriviaChallenge(BaseGame):
             if self.session.status != "in_progress":
                 return
             if remaining_time % 10 == 0 and channel:
-                text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining_time}s** remaining"
+                text = f"{config.emojis.timer} **{remaining_time}s** remaining"
                 try:
                     if countdown_msg:
                         await countdown_msg.edit(content=text)
@@ -138,17 +133,14 @@ class TriviaChallenge(BaseGame):
         correct_names = [self.session.state.players.get(str(pid), {}).display_name for pid in correct_pids]
 
         if channel:
-            await channel.send(
-                embed={
-                    "title": f"Round {round_number} — Answer",
-                    "description": f"**{correct_text}**",
-                    "color": 0x57F287 if correct_pids else 0xED4245,
-                    "fields": [
-                        {"name": "Correct", "value": ", ".join(correct_names) if correct_names else "No one", "inline": False},
-                        {"name": "Answered", "value": f"{len(self._round_answers)}/{len(remaining)}", "inline": True},
-                    ],
-                }
+            embed = discord.Embed(
+                title=f"Round {round_number} — Answer",
+                description=f"**{correct_text}**",
+                color=GREEN if correct_pids else RED,
             )
+            embed.add_field(name="Correct", value=", ".join(correct_names) if correct_names else "No one", inline=False)
+            embed.add_field(name="Answered", value=f"{len(self._round_answers)}/{len(remaining)}", inline=True)
+            await channel.send(embed=embed)
 
         await self._eliminate_bottom_two(round_number, channel)
 
@@ -180,13 +172,12 @@ class TriviaChallenge(BaseGame):
             )
 
             if channel:
-                await channel.send(
-                    embed={
-                        "title": "Eliminations",
-                        "description": f"{elim_names} {'are' if elim1 != elim2 else 'is'} eliminated!",
-                        "color": 0xED4245,
-                    }
+                embed = discord.Embed(
+                    title="Eliminations",
+                    description=f"{elim_names} {'are' if elim1 != elim2 else 'is'} eliminated!",
+                    color=RED,
                 )
+                await channel.send(embed=embed)
 
     async def on_end(self):
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
@@ -196,7 +187,7 @@ class TriviaChallenge(BaseGame):
         if channel:
             lines = []
             for i, p in enumerate(standings):
-                prefix = "<a:2434darkbluecrown:1531870115052916866>" if i == 0 else f"{i + 1}."
+                prefix = config.emojis.crown if i == 0 else f"{i + 1}."
                 lines.append(f"{prefix} {p.display_name} — **{p.score} pts**")
 
             eliminated = self.session.state.eliminated
@@ -204,24 +195,22 @@ class TriviaChallenge(BaseGame):
             for pid in eliminated:
                 player = self.session.state.players.get(str(pid))
                 if player:
-                    elim_lines.append(f"<:73190blueasterisk:1531870110896226344> {player.display_name} — Eliminated R{player.eliminated_at_round}")
+                    elim_lines.append(f"{config.emojis.asterisk} {player.display_name} — Eliminated R{player.eliminated_at_round}")
 
-            embed = {
-                "title": "Trivia Challenge — Final Standings",
-                "description": "\n".join(lines) if lines else "No scores",
-                "color": 0x808080,
-                "fields": [],
-            }
+            embed = discord.Embed(
+                title="Trivia Challenge — Final Standings",
+                description="\n".join(lines) if lines else "No scores",
+                color=GREY,
+            )
 
-            winner_name = "No one"
             if remaining:
                 winner = self.session.state.players.get(str(remaining[0]))
                 if winner:
                     winner_name = winner.display_name
-                    embed["fields"].append({"name": "<a:2434darkbluecrown:1531870115052916866> Winner", "value": winner_name, "inline": False})
+                    embed.add_field(name=f"{config.emojis.crown} Winner", value=winner_name, inline=False)
 
             if elim_lines:
-                embed["fields"].append({"name": "Eliminated", "value": "\n".join(elim_lines), "inline": False})
+                embed.add_field(name="Eliminated", value="\n".join(elim_lines), inline=False)
 
             await channel.send(embed=embed)
 
@@ -257,7 +246,7 @@ class TriviaAnswerButton(discord.ui.Button):
             return
         view._game._round_answers[pid] = self._answer_idx
         self.disabled = True
-        await interaction.response.send_message("<:205150heart951:1531870116587900928> Answer recorded!", ephemeral=True)
+        await interaction.response.send_message(f"{config.emojis.heart} Answer recorded!", ephemeral=True)
 
 
 class TriviaAnswerView(discord.ui.View):

@@ -88,11 +88,11 @@ main.py → HouseOfGamesBot (discord.ext.commands.Bot)
 | Aspect | Current Behavior | Intended Behavior |
 |--------|-----------------|-------------------|
 | Session persistence | In-memory only; DB models exist but SessionRepo/PlayerRepo never used | Should persist sessions and players to SQLite/Postgres |
-| `/play ask` command | NEVER works — checks `session.game` which is never set | Should relay DMs between players for Trust Game questioning |
+| `/play ask` command | ✅ FIXED — `session.game` is now assigned before `game.run()` | Should relay DMs between players for Trust Game questioning |
 | Standalone eliminations | `eliminate_player` has no mode guard; games eliminate regardless of mode | Should respect `eliminations_enabled` config flag |
-| Error handling | No try/except around `game.run()`; exception leaves session stuck `in_progress` | Should catch errors, report to channel, end session cleanly |
-| Hardcoded colors | All 4 games use raw hex values (0x5865F2, 0xED4245, 0x57F287, etc.) | Should use `bot.colors` constants (BLUE_PRIMARY, RED, GREEN, etc.) |
-| Hardcoded emoji IDs | `session_cog.py:169` hardcodes emoji IDs directly | Should import from `bot.emojis` |
+| Error handling | ✅ FIXED — try/except/finally wraps `game.run()`, logs errors, ends session on crash | Should catch errors, report to channel, end session cleanly |
+| Hardcoded colors | ✅ FIXED — all 4 games use `bot.colors` constants and `get_team_color()` | Should use `bot.colors` constants (BLUE_PRIMARY, RED, GREEN, etc.) |
+| Hardcoded emoji IDs | ✅ FIXED — all files use `config.emojis.*` instead of raw IDs | Should import from `config.emojis` |
 | RoundTimer usage | Timer is started but never actually controls flow; manual `asyncio.sleep` loops drive timing | Timer should enforce timeout and trigger callbacks |
 | DB blocking | Repos use sync SQLAlchemy inside async methods — blocks event loop | Should use `run_in_executor` or async SQLAlchemy |
 | Leaderboard cache leak | `_session_cache` is never cleaned up; accumulates forever | Should call `clear_session_cache` on session end |
@@ -145,8 +145,16 @@ See `issues.md` for the complete list.
 
 ### What's Missing / Would Fail
 
-1. **`/play ask` is completely broken** (C-GAME-1)
+1. **`/play ask` is completely broken** (C-GAME-1) — **✅ FIXED**
 2. **Standalone mode eliminates players anyway** (C-ENGINE-1)
-3. **If any game throws, session is stuck `in_progress` forever** (C-ENGINE-5)
+3. **If any game throws, session is stuck `in_progress` forever** (C-ENGINE-5) — **✅ FIXED**
 4. **Mafia center-card investigation is buggy** (C-MAFIA-1)
 5. **Timers are started but never drive game flow** (C-ENGINE-3)
+
+### Fixes Applied This Session
+- C-GAME-1: `session.game = game` assigned in `SessionCog.start()` before `game.run()`
+- C-ENGINE-5: `try/except/finally` wraps `game.run()` — logs error, sends crash embed, ends session
+- C-GAMES-1: All 4 games converted from raw hex embeds to `bot.colors` constants + `discord.Embed` objects
+- C-GAMES-2: All hardcoded emoji IDs replaced with `config.emojis.*` across all cogs and files
+- Added `AMBER = 0xFEE75C` color constant and `config.emojis` dict (timer, arrow, bullet, heart, asterisk, crown)
+- `bot/emojis.py` now delegates to `config.emojis.*` for backward compatibility

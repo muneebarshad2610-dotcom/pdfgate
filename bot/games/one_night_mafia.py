@@ -6,6 +6,8 @@ import discord
 from bot.engine.base import BaseGame
 from bot.engine.modes import GameMode
 from bot.games.mafia_roles import build_deck, ROLE_ORDER, evaluate_winner
+from bot.colors import BLUE_PRIMARY, GREEN, RED, GREY, AMBER
+from bot.config import config
 
 
 class OneNightMafia(BaseGame):
@@ -37,30 +39,26 @@ class OneNightMafia(BaseGame):
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
 
         if channel:
-            await channel.send(
-                embed={
-                    "title": "One Night Mafia — Night Falls",
-                    "description": "The game begins. Check your DMs for your role.",
-                    "color": 0x5865F2,
-                    "fields": [
-                        {"name": "Players", "value": str(len(player_ids)), "inline": True},
-                        {"name": "Center Cards", "value": "3 (hidden)", "inline": True},
-                    ],
-                }
+            embed = discord.Embed(
+                title="One Night Mafia — Night Falls",
+                description="The game begins. Check your DMs for your role.",
+                color=BLUE_PRIMARY,
             )
+            embed.add_field(name="Players", value=str(len(player_ids)), inline=True)
+            embed.add_field(name="Center Cards", value="3 (hidden)", inline=True)
+            await channel.send(embed=embed)
 
         for pid in player_ids:
             role = self._player_roles[str(pid)]
             user = self.session.bot.get_user(pid) if self.session.bot else None
             if user:
                 try:
-                    await user.send(
-                        embed={
-                            "title": "Your Role",
-                            "description": f"**{role['name']}** — {role['team'].title()} team\n\n{role['description']}",
-                            "color": get_team_color(role['team']),
-                        }
+                    embed = discord.Embed(
+                        title="Your Role",
+                        description=f"**{role['name']}** — {role['team'].title()} team\n\n{role['description']}",
+                        color=get_team_color(role['team']),
                     )
+                    await user.send(embed=embed)
                 except Exception:
                     pass
 
@@ -80,13 +78,12 @@ class OneNightMafia(BaseGame):
             await self._execute_night_action(role_name, players_with_role, channel)
 
         if self.session.bot and channel:
-            await channel.send(
-                embed={
-                    "title": "Dawn Breaks",
-                    "description": "The night phase is over. Time to vote!",
-                    "color": 0xFEE75C,
-                }
+            embed = discord.Embed(
+                title="Dawn Breaks",
+                description="The night phase is over. Time to vote!",
+                color=AMBER,
             )
+            await channel.send(embed=embed)
 
     async def _execute_night_action(self, role_name, player_ids, channel):
         action = self._player_roles.get(str(player_ids[0]), {}).get("night_action") if player_ids else None
@@ -104,13 +101,12 @@ class OneNightMafia(BaseGame):
                         for mid in mafia_ids if mid != pid
                     )
                     try:
-                        await user.send(
-                            embed={
-                                "title": "Mafia Sight",
-                                "description": f"Your fellow mafia members: **{names}**" if names else "You are the only mafia member.",
-                                "color": 0xED4245,
-                            }
+                        embed = discord.Embed(
+                            title="Mafia Sight",
+                            description=f"Your fellow mafia members: **{names}**" if names else "You are the only mafia member.",
+                            color=RED,
                         )
+                        await user.send(embed=embed)
                     except Exception:
                         pass
 
@@ -127,13 +123,12 @@ class OneNightMafia(BaseGame):
                         for mid in mafia_ids
                     )
                     try:
-                        await user.send(
-                            embed={
-                                "title": "Henchman Sight",
-                                "description": f"The mafia members are: **{names}**",
-                                "color": 0xED4245,
-                            }
+                        embed = discord.Embed(
+                            title="Henchman Sight",
+                            description=f"The mafia members are: **{names}**",
+                            color=RED,
                         )
+                        await user.send(embed=embed)
                     except Exception:
                         pass
 
@@ -151,13 +146,12 @@ class OneNightMafia(BaseGame):
                         for mid in other_masons
                     )
                     try:
-                        await user.send(
-                            embed={
-                                "title": "Mason Bond",
-                                "description": f"Your fellow mason: **{names}**",
-                                "color": 0x57F287,
-                            }
+                        embed = discord.Embed(
+                            title="Mason Bond",
+                            description=f"Your fellow mason: **{names}**",
+                            color=GREEN,
                         )
+                        await user.send(embed=embed)
                     except Exception:
                         pass
 
@@ -175,13 +169,12 @@ class OneNightMafia(BaseGame):
                 else:
                     result = self._player_roles.get(str(target_id), {}).get("name", "Unknown")
                 try:
-                    await user.send(
-                        embed={
-                            "title": "Investigation Result",
-                            "description": f"Target: **{result}**",
-                            "color": 0x57F287,
-                        }
+                    embed = discord.Embed(
+                        title="Investigation Result",
+                        description=f"Target: **{result}**",
+                        color=GREEN,
                     )
+                    await user.send(embed=embed)
                 except Exception:
                     pass
 
@@ -199,13 +192,12 @@ class OneNightMafia(BaseGame):
                 self._player_roles[str(pid)] = target_role
                 self._player_roles[str(target_id)] = my_role
                 try:
-                    await user.send(
-                        embed={
-                            "title": "Robbery Complete",
-                            "description": f"You swapped roles with {self.session.state.players.get(str(target_id), {}).display_name}. You do not know what role you received.",
-                            "color": 0xFEE75C,
-                        }
+                    embed = discord.Embed(
+                        title="Robbery Complete",
+                        description=f"You swapped roles with {self.session.state.players.get(str(target_id), {}).display_name}. You do not know what role you received.",
+                        color=AMBER,
                     )
+                    await user.send(embed=embed)
                 except Exception:
                     pass
 
@@ -222,13 +214,12 @@ class OneNightMafia(BaseGame):
                     self._player_roles[str(t1)] = role2
                     self._player_roles[str(t2)] = role1
                     try:
-                        await user.send(
-                            embed={
-                                "title": "Troublemaker",
-                                "description": f"You swapped the cards of {self.session.state.players.get(str(t1), {}).display_name} and {self.session.state.players.get(str(t2), {}).display_name}.",
-                                "color": 0xFEE75C,
-                            }
+                        embed = discord.Embed(
+                            title="Troublemaker",
+                            description=f"You swapped the cards of {self.session.state.players.get(str(t1), {}).display_name} and {self.session.state.players.get(str(t2), {}).display_name}.",
+                            color=AMBER,
                         )
+                        await user.send(embed=embed)
                     except Exception:
                         pass
 
@@ -238,13 +229,12 @@ class OneNightMafia(BaseGame):
                 user = self.session.bot.get_user(pid) if self.session.bot else None
                 if user:
                     try:
-                        await user.send(
-                            embed={
-                                "title": "Insomniac Check",
-                                "description": f"Your current role is: **{role.get('name', 'Unknown')}**",
-                                "color": 0x57F287,
-                            }
+                        embed = discord.Embed(
+                            title="Insomniac Check",
+                            description=f"Your current role is: **{role.get('name', 'Unknown')}**",
+                            color=GREEN,
                         )
+                        await user.send(embed=embed)
                     except Exception:
                         pass
 
@@ -266,13 +256,12 @@ class OneNightMafia(BaseGame):
                     is_mafia = target_role.get("team") == "mafia"
                 try:
                     msg = f"Target's role: **{result}**" if random.random() < 0.5 else f"Is mafia: **{'Yes' if is_mafia else 'No'}**"
-                    await user.send(
-                        embed={
-                            "title": "Seer Vision",
-                            "description": msg,
-                            "color": 0x57F287,
-                        }
+                    embed = discord.Embed(
+                        title="Seer Vision",
+                        description=msg,
+                        color=GREEN,
                     )
+                    await user.send(embed=embed)
                 except Exception:
                     pass
 
@@ -305,14 +294,12 @@ class OneNightMafia(BaseGame):
                         for p in self.session.state.player_order
                         if p != pid and not self.session.state.players.get(str(p), {}).eliminated
                     }
-                    await user.send(
-                        embed={
-                            "title": "Vote Now",
-                            "description": "Who do you think is the Mafia? Your vote is final.",
-                            "color": 0xFEE75C,
-                        },
-                        view=MafiaVoteView(targets=targets, game=self),
+                    embed = discord.Embed(
+                        title="Vote Now",
+                        description="Who do you think is the Mafia? Your vote is final.",
+                        color=AMBER,
                     )
+                    await user.send(embed=embed, view=MafiaVoteView(targets=targets, game=self))
                 except Exception:
                     pass
 
@@ -323,7 +310,7 @@ class OneNightMafia(BaseGame):
             if self.session.status != "in_progress":
                 return
             if remaining % 10 == 0 and channel:
-                text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining}s** remaining for voting"
+                text = f"{config.emojis.timer} **{remaining}s** remaining for voting"
                 try:
                     if countdown_msg:
                         await countdown_msg.edit(content=text)
@@ -370,18 +357,15 @@ class OneNightMafia(BaseGame):
         else:
             voted_name = "No one (tie)"
 
-        await channel.send(
-            embed={
-                "title": "Voting Results",
-                "description": f"**Voted out:** {voted_name}\n\n**Winner:** {scoring['winner_name']}",
-                "color": 0x808080,
-                "fields": [
-                    {"name": "Role Reveal", "value": roles_reveal, "inline": False},
-                    {"name": "Center Cards", "value": center_reveal, "inline": False},
-                    {"name": "Vote Tally", "value": format_vote_tally(vote_counts, self.session.state.players), "inline": False},
-                ],
-            }
+        embed = discord.Embed(
+            title="Voting Results",
+            description=f"**Voted out:** {voted_name}\n\n**Winner:** {scoring['winner_name']}",
+            color=GREY,
         )
+        embed.add_field(name="Role Reveal", value=roles_reveal, inline=False)
+        embed.add_field(name="Center Cards", value=center_reveal, inline=False)
+        embed.add_field(name="Vote Tally", value=format_vote_tally(vote_counts, self.session.state.players), inline=False)
+        await channel.send(embed=embed)
 
         for pid in self.session.state.player_order:
             player = self.session.state.players.get(str(pid))
@@ -424,13 +408,12 @@ class OneNightMafia(BaseGame):
                 f"{i + 1}. {p.display_name} — **{p.score} pts**"
                 for i, p in enumerate(standings)
             )
-            await channel.send(
-                embed={
-                    "title": "One Night Mafia — Final Scores",
-                    "description": lines,
-                    "color": 0x808080,
-                }
+            embed = discord.Embed(
+                title="One Night Mafia — Final Scores",
+                description=lines,
+                color=GREY,
             )
+            await channel.send(embed=embed)
 
     def record_vote(self, voter_id, target_id):
         if str(voter_id) not in self._player_roles:
@@ -464,7 +447,7 @@ class MafiaVoteSelect(discord.ui.Select):
         if view.game.record_vote(pid, target_id):
             self._has_voted.add(pid)
             self.disabled = True
-            await interaction.response.send_message("<:205150heart951:1531870116587900928> Vote recorded!", ephemeral=True)
+            await interaction.response.send_message(f"{config.emojis.heart} Vote recorded!", ephemeral=True)
         else:
             await interaction.response.send_message("You cannot vote.", ephemeral=True)
 
@@ -478,11 +461,7 @@ class MafiaVoteView(discord.ui.View):
 
 
 def get_team_color(team):
-    return {
-        "mafia": 0xED4245,
-        "civilian": 0x57F287,
-        "tanner": 0xFEE75C,
-    }.get(team, 0x5865F2)
+    return {"mafia": RED, "civilian": GREEN, "tanner": AMBER}.get(team, BLUE_PRIMARY)
 
 
 def format_vote_tally(vote_counts, players):

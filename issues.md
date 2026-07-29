@@ -18,6 +18,8 @@ always evaluates to `None`/falsy, and the command never proceeds.
 **Fix:** Assign `session.game = self._create_game(session)` in `SessionCog.start()`
 (or pass the game instance to the session constructor).
 
+**✅ FIXED** — `session_cog.py:128`: `session.game = game` assigned before `game.run()`.
+
 ---
 
 ## C-ENGINE-1 (HIGH): Eliminations fire in Standalone/Local mode
@@ -105,6 +107,8 @@ catch errors and call `session.end_game()`.
 **Fix:** Wrap `await game.run()` in try/except, log the error, send error embed
 to channel, and call `session.end_game()` in `finally`.
 
+**✅ FIXED** — `session_cog.py:127-139`: try/except log + error embed + finally end_session.
+
 ---
 
 ## C-GAMES-1 (MEDIUM): All 4 games hardcode embed colors instead of using `bot.colors`
@@ -130,6 +134,8 @@ Each game uses raw hex values for embed colors. Examples:
 Also `get_team_color()` in `one_night_mafia.py:480-485` is a function that does
 this mapping and should use `bot.colors`.
 
+**✅ FIXED** — All 4 games + `get_team_color()` now import from `bot.colors`.
+
 ---
 
 ## C-GAMES-2 (MEDIUM): `session_cog.py` status command hardcodes emoji IDs
@@ -142,6 +148,8 @@ players_list = "\n".join(
 ```
 
 Should import `HEART` and `ASTERISK` from `bot.emojis` instead.
+
+**✅ FIXED** — Now uses `config.emojis.heart` / `config.emojis.asterisk`. Same fix applied to `fun_cog.py`, `dev_cog.py`, `admin_cog.py`, `bot/emojis.py`.
 
 ---
 

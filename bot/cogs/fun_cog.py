@@ -5,6 +5,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.colors import BLUE_PRIMARY
+from bot.config import config
 
 
 class FunCog(commands.GroupCog, group_name="fun"):
@@ -23,13 +24,13 @@ class FunCog(commands.GroupCog, group_name="fun"):
             return
         result = random.randint(1, sides)
         await interaction.response.send_message(
-            f"<a:91490animatedarrowblue:1531868497242620014> **{interaction.user.display_name}** rolled a **{result}** (d{sides})"
+            f"{config.emojis.timer} **{interaction.user.display_name}** rolled a **{result}** (d{sides})"
         )
 
     @app_commands.command(name="flip", description="Flip a coin")
     async def flip(self, interaction: discord.Interaction):
         result = random.choice(["Heads", "Tails"])
-        emoji = "<:205150heart951:1531870116587900928>" if result == "Heads" else "<:73190blueasterisk:1531870110896226344>"
+        emoji = config.emojis.heart if result == "Heads" else config.emojis.asterisk
         await interaction.response.send_message(f"{emoji} **{interaction.user.display_name}** flipped **{result}**")
 
     @app_commands.command(name="choose", description="Pick one option from a list")
@@ -41,7 +42,7 @@ class FunCog(commands.GroupCog, group_name="fun"):
             return
         chosen = random.choice(parts)
         await interaction.response.send_message(
-            f"<a:259419darkbluearrow:1531868494851739792> I choose **{chosen}**"
+            f"{config.emojis.arrow} I choose **{chosen}**"
         )
 
     @app_commands.command(name="random", description="Get a random number between min and max")
@@ -55,7 +56,7 @@ class FunCog(commands.GroupCog, group_name="fun"):
             return
         result = random.randint(minimum, maximum)
         await interaction.response.send_message(
-            f"<a:91490animatedarrowblue:1531868497242620014> Random number: **{result}** (between {minimum} and {maximum})"
+            f"{config.emojis.timer} Random number: **{result}** (between {minimum} and {maximum})"
         )
 
     @app_commands.command(name="avatar", description="Get a user's avatar URL")
@@ -85,7 +86,7 @@ class FunCog(commands.GroupCog, group_name="fun"):
             "Outlook not so good.", "Very doubtful.",
         ]
         embed = discord.Embed(
-            title="<a:91490animatedarrowblue:1531868497242620014> Magic 8-Ball",
+            title=f"{config.emojis.timer} Magic 8-Ball",
             description=f"**{question}**\n\n{random.choice(responses)}",
             color=BLUE_PRIMARY,
         )
@@ -96,8 +97,8 @@ class FunCog(commands.GroupCog, group_name="fun"):
     @app_commands.describe(thing="The thing to rate")
     async def rate(self, interaction: discord.Interaction, thing: str):
         score = random.randint(1, 10)
-        filled = "<:205150heart951:1531870116587900928>" * score
-        empty = "<:73190blueasterisk:1531870110896226344>" * (10 - score)
+        filled = str(config.emojis.heart) * score
+        empty = str(config.emojis.asterisk) * (10 - score)
         embed = discord.Embed(
             title="Rating",
             description=f"I rate **{thing}** a **{score}/10**\n{filled}{empty}",

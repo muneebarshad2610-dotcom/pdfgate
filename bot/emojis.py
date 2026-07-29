@@ -1,6 +1,8 @@
-TIMER = "<a:91490animatedarrowblue:1531868497242620014>"
-ARROW = "<a:259419darkbluearrow:1531868494851739792>"
-BULLET = "<:390261deepbluebullet:1531870112959959081>"
-HEART = "<:205150heart951:1531870116587900928>"
-ASTERISK = "<:73190blueasterisk:1531870110896226344>"
-CROWN = "<a:2434darkbluecrown:1531870115052916866>"
+from bot.config import config
+
+TIMER = config.emojis.timer
+ARROW = config.emojis.arrow
+BULLET = config.emojis.bullet
+HEART = config.emojis.heart
+ASTERISK = config.emojis.asterisk
+CROWN = config.emojis.crown

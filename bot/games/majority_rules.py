@@ -7,6 +7,8 @@ import discord
 from bot.engine.base import BaseGame
 from bot.config import QUESTIONS_DIR
 from bot.engine.modes import GameMode
+from bot.colors import BLUE_PRIMARY, GREEN, RED, GREY
+from bot.config import config
 
 
 def load_questions():
@@ -53,7 +55,7 @@ class MajorityRules(BaseGame):
                         for pid in table
                     )
                     lines.append(f"**Table {idx + 1}:** {names}")
-                await channel.send(embed={"title": "Tables Assigned!", "description": "\n".join(lines), "color": 0x5865F2})
+                await channel.send(embed=discord.Embed(title="Tables Assigned!", description="\n".join(lines), color=BLUE_PRIMARY))
 
     async def on_round(self, round_number: int):
         question = self._questions[round_number - 1]
@@ -72,18 +74,10 @@ class MajorityRules(BaseGame):
             )
 
             if self.session.bot and channel:
-                await channel.send(
-                    embed={
-                        "title": f"Round {round_number}/10 — Table {table_idx + 1}",
-                        "description": text,
-                        "color": 0x5865F2,
-                        "fields": [
-                            {"name": "<a:91490animatedarrowblue:1531868497242620014> Time", "value": "30 seconds", "inline": True},
-                            {"name": "Players", "value": str(len(table)), "inline": True},
-                        ],
-                    },
-                    view=view,
-                )
+                embed = discord.Embed(title=f"Round {round_number}/10 \u2014 Table {table_idx + 1}", description=text, color=BLUE_PRIMARY)
+                embed.add_field(name=f"{config.emojis.timer} Time", value="30 seconds", inline=True)
+                embed.add_field(name="Players", value=str(len(table)), inline=True)
+                await channel.send(embed=embed, view=view)
 
                 for pid in table:
                     player = self.session.state.players.get(str(pid))
@@ -92,11 +86,7 @@ class MajorityRules(BaseGame):
                         if user:
                             try:
                                 await user.send(
-                                    embed={
-                                        "title": f"Round {round_number} — Your Vote",
-                                        "description": text,
-                                        "color": 0x57F287,
-                                    },
+                                    embed=discord.Embed(title=f"Round {round_number} \u2014 Your Vote", description=text, color=GREEN),
                                     view=MinorityVoteDMView(options=options, results=table_results, pid=pid),
                                 )
                             except Exception:
@@ -110,7 +100,7 @@ class MajorityRules(BaseGame):
                 if self.session.status != "in_progress":
                     return
                 if remaining % 10 == 0 and channel:
-                    text = f"<a:91490animatedarrowblue:1531868497242620014> **{remaining}s** remaining for Table {table_idx + 1}"
+                    text = f"{config.emojis.timer} **{remaining}s** remaining for Table {table_idx + 1}"
                     try:
                         if countdown_msg:
                             await countdown_msg.edit(content=text)
@@ -135,17 +125,14 @@ class MajorityRules(BaseGame):
             ]
 
             if channel:
-                await channel.send(
-                    embed={
-                        "title": f"Table {table_idx + 1} Results",
-                        "description": f"**Majority answer:** {majority}\n**Votes:** {votes_for}/{len(table)}",
-                        "color": 0x57F287 if scorers else 0xED4245,
-                        "fields": [
-                            {"name": "Scored +1", "value": ", ".join(scorers) if scorers else "No one", "inline": False},
-                            {"name": "Vote Distribution", "value": format_vote_distribution(options, table_results, table), "inline": False},
-                        ],
-                    }
+                embed = discord.Embed(
+                    title=f"Table {table_idx + 1} Results",
+                    description=f"**Majority answer:** {majority}\n**Votes:** {votes_for}/{len(table)}",
+                    color=GREEN if scorers else RED,
                 )
+                embed.add_field(name="Scored +1", value=", ".join(scorers) if scorers else "No one", inline=False)
+                embed.add_field(name="Vote Distribution", value=format_vote_distribution(options, table_results, table), inline=False)
+                await channel.send(embed=embed)
 
     async def on_end(self):
         all_scores = {}
@@ -158,15 +145,11 @@ class MajorityRules(BaseGame):
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
         if channel:
             standings = "\n".join(
-                f"{i + 1}. {self.session.state.players[str(pid)].display_name} — **{score} pts**"
+                f"{i + 1}. {self.session.state.players[str(pid)].display_name} \u2014 **{score} pts**"
                 for i, (pid, score) in enumerate(ranked)
             )
             await channel.send(
-                embed={
-                    "title": "Final Standings — Majority Rules",
-                    "description": standings,
-                    "color": 0x808080,
-                }
+                embed=discord.Embed(title="Final Standings \u2014 Majority Rules", description=standings, color=GREY)
             )
 
         top4 = ranked[:4]
@@ -195,11 +178,11 @@ class MajorityRules(BaseGame):
                         for pid, _ in eliminated
                     )
                     await channel.send(
-                        embed={
-                            "title": "Eliminations",
-                            "description": f"{elim_names} {'is' if len(eliminated) == 1 else 'are'} eliminated from the house.",
-                            "color": 0xED4245,
-                        }
+                        embed=discord.Embed(
+                            title="Eliminations",
+                            description=f"{elim_names} {'is' if len(eliminated) == 1 else 'are'} eliminated from the house.",
+                            color=RED,
+                        )
                     )
 
 
@@ -220,7 +203,7 @@ class MajorityVoteButton(discord.ui.Button):
             return
         view._results[pid] = self._opt_label
         view._voted.add(pid)
-        await interaction.response.send_message("<:205150heart951:1531870116587900928> Vote recorded!", ephemeral=True)
+        await interaction.response.send_message(f"{config.emojis.heart} Vote recorded!", ephemeral=True)
 
 
 class MajorityVoteView(discord.ui.View):
@@ -273,7 +256,7 @@ class MinorityVoteDMButton(discord.ui.Button):
             return
         self._results[self._pid] = self._opt_label
         self.disabled = True
-        await interaction.response.send_message("<:205150heart951:1531870116587900928> Vote recorded!", ephemeral=True)
+        await interaction.response.send_message(f"{config.emojis.heart} Vote recorded!", ephemeral=True)
 
 
 def calculate_majority(options, results):

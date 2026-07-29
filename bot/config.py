@@ -29,6 +29,14 @@ config = AttrDict.from_nested({
         "round_timeout": 30,
         "vote_timeout": 60,
     },
+    "emojis": {
+        "timer": "<a:91490animatedarrowblue:1531868497242620014>",
+        "arrow": "<a:259419darkbluearrow:1531868494851739792>",
+        "bullet": "<:390261deepbluebullet:1531870112959959081>",
+        "heart": "<:205150heart951:1531870116587900928>",
+        "asterisk": "<:73190blueasterisk:1531870110896226344>",
+        "crown": "<a:2434darkbluecrown:1531870115052916866>",
+    },
 })
 
 BASE_DIR = Path(__file__).resolve().parent.parent
