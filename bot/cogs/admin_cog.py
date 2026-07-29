@@ -1,9 +1,13 @@
+import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 from bot.colors import BLUE_PRIMARY
 from bot.config import config
+
+log = logging.getLogger("house_of_games.admin")
 
 
 class AdminCog(commands.Cog):
@@ -45,6 +49,7 @@ class AdminCog(commands.Cog):
             await interaction.followup.send(msg)
         except Exception as e:
             await interaction.followup.send(f"Failed to sync commands: {e}")
+            log.exception("Command sync failed")
 
     @app_commands.command(name="force_end", description="Force-end all sessions on this server (admin only)")
     async def force_end(self, interaction: discord.Interaction):

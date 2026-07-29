@@ -37,7 +37,7 @@
 | `/play majority` | Start a Majority Rules game (Standalone/Local) | ✅ |
 | `/play mafia` | Start a One Night Mafia game | ✅ |
 | `/play trivia` | Start a Trivia Challenge game | ✅ |
-| `/play trust` | Start a The Trust Game | 🔜 Planned |
+| `/play trust` | Start a The Trust Game | ✅ |
 
 ## 4. Interaction Patterns
 
@@ -105,19 +105,16 @@
 │  Use your 3 questions to identify   │
 │  it.                                │
 │                                     │
-│  ❓ Question 1 (Truth Token avail):  │
-│  [Ask a question...]                │
+│  Use `/play ask @player question`   │
+│  in DMs to ask about their card.    │
 │                                     │
-│  ❓ Question 2:                      │
-│  [Ask a question...]                │
-│                                     │
-│  ❓ Question 3:                      │
-│  [Ask a question...]                │
+│  Add `tt:True` to use your Truth    │
+│  Token for a guaranteed answer.     │
 │                                     │
 │  🔒 [Lock in my guess]              │
 │                                     │
-│  (Modal input — one question at     │
-│   a time to reduce chaos)           │
+│  (Slash command — open DM and       │
+│   type /play ask to begin)          │
 └─────────────────────────────────────┘
 ```
 

@@ -47,7 +47,7 @@ bot/
 ├── games/          # Game implementations (4 games)
 └── main.py         # Entry point
 tests/
-└── test_*.py       # Pytest test suites (102 tests)
+└── test_*.py       # Pytest test suites (222 tests)
 docs/
 └── *.md            # Architecture, PRD, UX, deployment docs
 ```
@@ -67,17 +67,24 @@ See [docs/deployment-guide.md](docs/deployment-guide.md) for Docker, Railway, an
 
 | Command | Description |
 |---------|-------------|
-| `/create [mode]` | Create a new game session (campaign / standalone / local) |
+| Command | Description |
+|---------|-------------|
+| `/create [mode] [game]` | Create a new game session |
 | `/join` | Join an open session |
 | `/leave` | Leave the current session |
 | `/start` | Start the game (host only) |
 | `/end` | End the session (host only) |
 | `/status` | Show session state |
+| `/leaderboard [mode]` | View rankings |
 | `/play majority` | Start Majority Rules |
 | `/play mafia` | Start One Night Mafia |
 | `/play trivia` | Start Trivia Challenge |
 | `/play trust` | Start The Trust Game |
+| `/play ask` | Ask a question in Trust Game (DM) |
 | `/help` | Show help |
 | `/ping` | Bot latency |
-| `/sync` | Sync commands (admin) |
+| `/sync [scope]` | Sync slash commands (admin) |
 | `/force_end` | Force-end sessions (admin) |
+| `/fun ...` | Fun commands: roll, flip, choose, random, avatar, 8ball, rate |
+| `/dev ...` | Dev commands: echo, permissions, user_info, server_info, uptime |
+| `/test ...` | Test commands: embed, fill, question |

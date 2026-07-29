@@ -149,35 +149,34 @@ A quiz game where players answer general knowledge questions. Bottom players are
 
 ---
 
-## Game 4: The Trust Game 🔜 *Not yet implemented*
+## Game 4: The Trust Game ✅
 
 ### Description
 A high-stakes deduction game where players must identify their own hidden card by questioning others.
 
-### Setup (Planned)
-- **Players:** 10 (or configurable 8-12).
+### Setup
+- **Players:** 10.
 - **Deck:** 12 face cards (J, Q, K of hearts, diamonds, clubs, spades).
-- **Dealing:** Each player receives 1 card hidden from themselves. Remaining cards go to the center.
+- **Dealing:** Each player receives 1 card hidden from themselves. Remaining 2 cards go to the center.
 - **Rounds:** 8.
 
-### Card Assignment (Planned)
+### Card Assignment
 - Each player's card is displayed to **other players** but hidden from the card's owner.
-- The card is attached to the player's Discord display name during the round.
 
-### Round Flow (Planned)
+### Round Flow
 
 #### Phase 1: Questioning (90 seconds)
 - Each player gets **3 questions** to ask other players about their card.
-- **Truth Token (1 per round):** One of the three questions can be designated as a "Truth Token." The host (bot) answers this question truthfully on behalf of the target player.
+- **Truth Token (1 per round):** One of the three questions can be designated as a "Truth Token." The bot answers this question truthfully on behalf of the target player.
 - **Lying encouraged:** For the other 2 questions, the answering player may lie or tell the truth as they wish.
-- Questions are submitted via a modal interface.
+- Questions are submitted via `/play ask @player question [tt:bool]` slash command in DM.
 - Answers are sent via ephemeral message to the asker.
 
 #### Phase 2: Guess Lock (30 seconds)
 - After questioning ends, players lock in their guess about their own card.
-- Guesses are submitted via buttons (select from 12 cards).
+- Guesses are submitted via a dropdown (select from 12 cards).
 
-### Scoring (Planned)
+### Scoring
 
 | Event | Points |
 |-------|--------|
@@ -185,21 +184,21 @@ A high-stakes deduction game where players must identify their own hidden card b
 | Incorrect guess | 0 |
 | Void (no guess) | 0 |
 
-### End of Game (Planned)
+### End of Game
 - After 8 rounds, top 2 players on the leaderboard advance.
 - Bottom players face elimination (in Campaign mode).
 
-### Truth Token Mechanics (Planned)
+### Truth Token Mechanics
 - The bot knows all card assignments.
 - When a Truth Token question is asked, the bot responds with an absolutely truthful answer about the target player's card.
 - Example: "Is Alice's card a heart?" → Bot answers "Yes" or "No" truthfully.
 - Players must decide which of their 3 questions to use their Truth Token on.
 
-### Strategy Notes (Planned)
+### Strategy Notes
 - Players may collude, bluff, or form alliances.
 - The Trust Game is designed to create drama and social dynamics around who can be trusted.
 
-### Mode-Specific Behavior (Planned)
+### Mode-Specific Behavior
 - **Campaign:** Points advance the season leaderboard. Bottom players eliminated from the house.
 - **Standalone:** Session leaderboard only.
 - **Local:** No recording.

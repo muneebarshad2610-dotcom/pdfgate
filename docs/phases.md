@@ -99,25 +99,25 @@
 
 ---
 
-## Phase 5: Game 4 — The Trust Game 🔜
+## Phase 5: Game 4 — The Trust Game ✅
 
 ### Goals
 - Fully implement The Trust Game.
 - Handle complex social deduction mechanics.
 
 ### Tasks
-- [ ] Implement face-card deck (12 cards) and hidden dealing.
-- [ ] Implement questioning phase: 3 questions per round, 1 Truth Token.
-- [ ] Implement answering flow: truth-teller mode (host-verified) vs. liar mode (free-form).
-- [ ] Implement guess-lock phase after questioning.
-- [ ] Implement scoring: correct guess = points, wrong guess = 0 + elimination risk.
-- [ ] Implement 8-round loop with top-2 advancement and bottom elimination.
-- [ ] Write unit tests for Truth Token logic and scoring.
-- [ ] Write integration test for full 8-round game.
+- [x] Implement face-card deck (12 cards) and hidden dealing.
+- [x] Implement questioning phase: 3 questions per round, 1 Truth Token.
+- [x] Implement answering flow: truth-teller mode (host-verified) vs. liar mode (free-form).
+- [x] Implement guess-lock phase after questioning.
+- [x] Implement scoring: correct guess = points, wrong guess = 0 + elimination risk.
+- [x] Implement 8-round loop with top-2 advancement and bottom elimination.
+- [x] Write unit tests for Truth Token logic and scoring.
+- [x] Write integration test for full 8-round game.
 
 ### Deliverables
-- [ ] `/play trust` command.
-- [ ] Fully playable The Trust Game in all three modes.
+- [x] `/play trust` command.
+- [x] Fully playable The Trust Game in all three modes.
 
 ---
 

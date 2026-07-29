@@ -174,6 +174,12 @@ class SessionManager:
                     return session
         return None
 
+    def get_player_session_by_user(self, discord_id: int):
+        for session in self._sessions.values():
+            if session.status != "completed" and str(discord_id) in session.state.players:
+                return session
+        return None
+
     def end_session(self, session_id: str):
         session = self._sessions.get(session_id)
         if session:

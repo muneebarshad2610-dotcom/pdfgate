@@ -72,21 +72,21 @@ class GameCog(commands.GroupCog, group_name="play"):
 
     @app_commands.command(name="ask", description="Ask a question in The Trust Game (DM only)")
     @app_commands.describe(
-        target="The player you're asking",
+        target="The player you're asking (name or ID)",
         question="Your question",
         tt="Use your Truth Token for a guaranteed truthful answer",
     )
     async def ask(
         self,
         interaction: discord.Interaction,
-        target: discord.Member,
+        target: str,
         question: str,
         tt: bool = False,
     ):
         if interaction.channel.type != discord.ChannelType.private:
             await interaction.response.send_message("This command can only be used in DMs.", ephemeral=True)
             return
-        session = session_manager.get_player_session(interaction.guild_id, interaction.user.id)
+        session = session_manager.get_player_session_by_user(interaction.user.id)
         if not session or not session.game:
             await interaction.response.send_message("You're not in an active game.", ephemeral=True)
             return
@@ -94,7 +94,7 @@ class GameCog(commands.GroupCog, group_name="play"):
             await interaction.response.send_message("This command is only for The Trust Game.", ephemeral=True)
             return
         game = session.game
-        await game.handle_question(interaction.user.id, str(target.id), question, tt)
+        await game.handle_question(interaction.user.id, target, question, tt)
         await interaction.response.send_message("Question sent!", ephemeral=True)
 
 

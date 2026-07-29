@@ -42,9 +42,9 @@
 | FR-10 | One Night Mafia shall execute night phases and a voting phase | P0 | ✅ |
 | FR-11 | Trivia Challenge shall present general knowledge questions | P0 | ✅ |
 | FR-12 | Trivia Challenge shall eliminate bottom 2 players per round | P1 | ✅ |
-| FR-13 | The Trust Game shall deal hidden face cards to each player | P0 | 🔜 Not implemented |
-| FR-14 | The Trust Game shall provide 3 questions per round (1 Truth Token) | P0 | 🔜 Not implemented |
-| FR-15 | The Trust Game shall run 8 rounds per session | P0 | 🔜 Not implemented |
+| FR-13 | The Trust Game shall deal hidden face cards to each player | P0 | ✅ |
+| FR-14 | The Trust Game shall provide 3 questions per round (1 Truth Token) | P0 | ✅ |
+| FR-15 | The Trust Game shall run 8 rounds per session | P0 | ✅ |
 
 ### 4.3 Non-Functional Requirements
 
@@ -77,6 +77,6 @@
 | Majority Rules | ✅ Complete (Phase 2) |
 | One Night Mafia | ✅ Complete (Phase 3) |
 | Trivia Challenge | ✅ Complete (Phase 4) |
-| The Trust Game | 🔜 Not implemented (Phase 5) |
+| The Trust Game | ✅ Complete (Phase 5) |
 | Polish & Deployment | 🔜 Partial (Phase 6) |
-| **Total Tests** | **83 unit tests** (27 session + 9 majority + 13 mafia + 8 modes + 22 trivia + 4 parametrized) |
+| **Total Tests** | **222 tests** (22 session + 10 modes + 19 flows + 10 majority + 13 mafia + 18 trivia + 15 trust + 87 simulation + other) |

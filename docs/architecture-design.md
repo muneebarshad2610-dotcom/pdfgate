@@ -57,7 +57,7 @@
 - `one_night_mafia.py` — Fully implemented (13-card deck, night phase, voting, role reveal).
 - `mafia_roles.py` — Role definitions, deck builder, win-condition evaluator.
 - `trivia.py` — Fully implemented (236 questions, dynamic rounds, ephemeral DM answers).
-- `trust_game.py` — **Not yet implemented.**
+- `trust_game.py` — Fully implemented (8 rounds, questioning phase with `/play ask`, guessing phase).
 
 ### 2.5 Database (`bot/db/`)
 - `models.py` — SQLAlchemy ORM models (`SessionModel`, `PlayerModel`, `LeaderboardEntryModel`), engine/session helpers, `init_db()`.
@@ -200,7 +200,7 @@ Bot: [Embed] Eliminations — bottom 6 eliminated from house (Campaign mode)
 | ORM | SQLAlchemy 2.0 | ✅ |
 | Migrations | Alembic 1.13+ | ⏳ (in deps, not configured) |
 | Task Scheduling | asyncio | ✅ |
-| Testing | pytest 8+ / pytest-asyncio | ✅ (57 tests) |
+| Testing | pytest 8+ / pytest-asyncio | ✅ (222 tests) |
 | CI/CD | GitHub Actions | ❌ (not set up) |
 | Deployment | Docker + Railway | ❌ (not set up) |
 

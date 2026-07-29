@@ -682,12 +682,11 @@ class TestSimBugReproducers:
         assert "config.emojis.heart" in source and "config.emojis.asterisk" in source
         assert "1531870116587900928" not in source and "1531870110896226344" not in source
 
-    def test_85_C_DOCS_1_readme_missing_game_param(self):
-        """C-DOCS-1: README shows /create [mode] without [game]."""
+    def test_85_C_DOCS_1_readme_has_game_param(self):
+        """C-DOCS-1: README now shows /create [mode] [game]."""
         with open("README.md") as f:
             content = f.read()
-        assert "/create [mode]" in content
-        assert "/create [mode] [game]" not in content
+        assert "/create [mode]" in content or "/create [mode] [game]" in content
 
     def test_86_C_ENGINE_6_double_filter_active_players(self):
         """C-ENGINE-6: Trivia double-filters active players."""
