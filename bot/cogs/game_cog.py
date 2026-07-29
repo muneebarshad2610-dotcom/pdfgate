@@ -63,6 +63,13 @@ class GameCog(commands.GroupCog, group_name="play"):
         if session:
             session.game_type = "trivia"
 
+    @app_commands.command(name="trust", description="Play The Trust Game")
+    @app_commands.describe(local="Play locally with no leaderboard tracking")
+    async def trust(self, interaction: discord.Interaction, local: bool = False):
+        session = await self._setup_game(interaction, "trust", local)
+        if session:
+            session.game_type = "trust"
+
 
 async def setup(bot):
     await bot.add_cog(GameCog(bot))
