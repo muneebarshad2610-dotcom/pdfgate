@@ -89,7 +89,7 @@ class SessionCog(commands.Cog):
                 embed.add_field(name="Ready to Start", value="The host can now use `/start` to begin!", inline=False)
             await interaction.response.send_message(embed=embed)
         except SessionFullError:
-            await interaction.response.send_message("Session is full (max 10 players).", ephemeral=True)
+            await interaction.response.send_message(f"Session is full (max {session.max_players} players).", ephemeral=True)
         except SessionLockedError:
             await interaction.response.send_message("Session has already started.", ephemeral=True)
 

@@ -24,7 +24,7 @@ MODE_CONFIG = AttrDict.from_nested({
         "leaderboard_persistent": False,
         "leaderboard_scope": "session",
         "eliminations_enabled": False,
-        "min_players": 10,
+        "min_players": 3,
         "max_players": 10,
     },
     GameMode.LOCAL.value: {
@@ -33,7 +33,7 @@ MODE_CONFIG = AttrDict.from_nested({
         "leaderboard_persistent": False,
         "leaderboard_scope": "none",
         "eliminations_enabled": False,
-        "min_players": 10,
+        "min_players": 3,
         "max_players": 10,
     },
 })

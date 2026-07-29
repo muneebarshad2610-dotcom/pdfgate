@@ -33,10 +33,10 @@ class GameCog(commands.GroupCog, group_name="play"):
 
         embed = discord.Embed(
             title=f"{game_type.replace('_', ' ').title()} — {mode.value.title()}",
-            description=f"Game created by {interaction.user.mention}\nUse `/join` to enter!\nHost uses `/start` to begin. Need 10 players.",
+            description=f"Game created by {interaction.user.mention}\nUse `/join` to enter!\nHost uses `/start` to begin. Need {session.min_players} players.",
             color=BLUE_PRIMARY,
         )
-        embed.add_field(name="Players", value=f"1/10", inline=True)
+        embed.add_field(name="Players", value=f"1/{session.max_players}", inline=True)
 
         await interaction.response.send_message(embed=embed)
         return session

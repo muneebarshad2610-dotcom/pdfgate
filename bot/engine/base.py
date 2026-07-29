@@ -38,4 +38,3 @@ class BaseGame(ABC):
             self.state.current_round = round_num
             await self.on_round(round_num)
         await self.on_end()
-        self.session.end_game()

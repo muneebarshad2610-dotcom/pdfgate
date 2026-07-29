@@ -23,12 +23,6 @@ config = AttrDict.from_nested({
     "logging": {
         "level": os.getenv("LOG_LEVEL", "INFO"),
     },
-    "game": {
-        "min_players": 10,
-        "max_players": 10,
-        "round_timeout": 30,
-        "vote_timeout": 60,
-    },
     "emojis": {
         "timer": "<a:91490animatedarrowblue:1531868497242620014>",
         "arrow": "<a:259419darkbluearrow:1531868494851739792>",

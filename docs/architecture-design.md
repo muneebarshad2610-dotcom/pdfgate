@@ -50,7 +50,7 @@
 - `modes.py` — `GameMode` enum (CAMPAIGN, STANDALONE, LOCAL) + `MODE_CONFIG` dict.
 - `leaderboard.py` — `LeaderboardManager` wrapping `LeaderboardRepo`.
 - `timer.py` — `RoundTimer` using `asyncio.create_task`.
-- `errors.py` — Custom exception hierarchy (17 exception types).
+- `errors.py` — Custom exception hierarchy (14 exception types).
 
 ### 2.4 Games (`bot/games/`)
 - `majority_rules.py` — Fully implemented (10 rounds, table splitting, ephemeral voting).

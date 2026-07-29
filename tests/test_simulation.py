@@ -322,7 +322,8 @@ class TestSimModeConfig:
     def test_43_min_max_players(self):
         for mode in GameMode:
             cfg = get_mode_config(mode)
-            assert cfg.min_players == 10
+            expected_min = 10 if mode == GameMode.CAMPAIGN else 3
+            assert cfg.min_players == expected_min
             assert cfg.max_players == 10
 
 

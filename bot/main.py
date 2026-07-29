@@ -35,12 +35,16 @@ class HouseOfGamesBot(commands.Bot):
     async def setup_hook(self):
         await self._load_cogs()
         await init_db()
-        DEV_GUILD_ID = 1522345099181297704
-        guild = discord.Object(id=DEV_GUILD_ID)
-        self.tree.clear_commands(guild=guild)
-        self.tree.copy_global_to(guild=guild)
-        await self.tree.sync(guild=guild)
-        log.info("Bot setup complete — cogs loaded, database initialized, dev guild synced")
+        try:
+            DEV_GUILD_ID = 1522345099181297704
+            guild = discord.Object(id=DEV_GUILD_ID)
+            self.tree.clear_commands(guild=guild)
+            self.tree.copy_global_to(guild=guild)
+            await self.tree.sync(guild=guild)
+            log.info("Dev guild synced successfully")
+        except Exception:
+            log.exception("Dev guild sync failed — commands may be stale")
+        log.info("Bot setup complete")
 
     async def _load_cogs(self):
         cogs = [

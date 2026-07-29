@@ -38,7 +38,6 @@ class TrustGame(BaseGame):
             self.state.current_round = round_num
             await self.on_round(round_num)
         await self.on_end()
-        self.session.end_game()
 
     async def on_start(self):
         deck = build_trust_deck()

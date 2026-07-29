@@ -37,7 +37,6 @@ class TriviaChallenge(BaseGame):
             round_num += 1
         self.state.total_rounds = round_num - 1
         await self.on_end()
-        self.session.end_game()
 
     async def on_start(self):
         if len(self._questions) < 1:

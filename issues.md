@@ -245,6 +245,8 @@ async def ask(self, interaction, target: discord.Member, question: str, tt: bool
 
 **Fix:** Change `target: discord.Member` to `target: str` (accept display name or ID) or `target: discord.User` (resolves globally).
 
+**✅ FIXED** — Changed to `target: str`, uses `get_player_session_by_user()` for DM session lookup.
+
 ---
 
 ## C-GAME-3 (CRITICAL): `/play ask` guild_id is `None` in DMs
@@ -258,6 +260,8 @@ session = session_manager.get_player_session(interaction.guild_id, interaction.u
 `interaction.guild_id` is `None` when the command is used in DMs. `get_player_session` checks `session.guild_id == guild_id` — since all sessions have a real guild ID, `None == actual_guild_id` is always `False`. The command **never** finds the player's session and always responds "You're not in an active game."
 
 **Fix:** Add `get_player_session_by_user(discord_id)` to `SessionManager` that searches across all guilds, and use it in DM-based commands.
+
+**✅ FIXED** — Added `get_player_session_by_user()` to `SessionManager` at `session.py:170-175`, used in `game_cog.py:89`.
 
 ---
 
@@ -273,6 +277,8 @@ session = session_manager.get_player_session(interaction.guild_id, interaction.u
 **Impact:** For MajorityRules and OneNightMafia: 2 calls. For Trivia and Trust: 3 calls. `end_game()` sets `status = "completed"` and cancels timers — both are idempotent, so the double/triple calls are harmless but indicate design confusion.
 
 **Fix:** Remove `end_game()` calls from individual games' `run()` methods and `BaseGame.run()`. Let `SessionCog.start()`'s `finally` block be the sole caller.
+
+**✅ FIXED** — Removed `self.session.end_game()` from `base.py:41`, `trivia.py:40`, `trust_game.py:41`.
 
 ---
 
@@ -294,6 +300,8 @@ If any of these calls fail (rate limited, Discord API error, invalid guild ID), 
 
 **Fix:** Wrap dev guild sync in try/except, log the error, and continue.
 
+**✅ FIXED** — `main.py:38-46`: `setup_hook` sync wrapped in try/except with `log.exception()`.
+
 ---
 
 ## C-MODES-1 (MEDIUM): All modes require exactly 10 players
@@ -312,6 +320,8 @@ All three modes mandate exactly 10 players. Standalone and Local modes are docum
 
 **Fix:** Reduce min_players for STANDALONE and LOCAL to 3 or 4. Ensure all 4 games handle <10 players gracefully.
 
+**✅ FIXED** — STANDALONE and LOCAL `min_players` changed to 3 in `modes.py`. `game_cog.py` and `session_cog.py` now use dynamic min/max from session config.
+
 ---
 
 ## C-CONFIG-1 (LOW): `config.game.min_players`/`max_players` are unused
@@ -325,6 +335,8 @@ All three modes mandate exactly 10 players. Standalone and Local modes are docum
 These values are defined in `bot/config.py` but **never read by any code**. The mode configs in `bot/engine/modes.py` are used instead.
 
 **Fix:** Either remove from `config.py` or document that they exist as overrides. Currently dead config.
+
+**✅ FIXED** — Removed unused `game` section from `config.py`.
 
 ---
 
@@ -342,6 +354,8 @@ The architecture doc claims "17 exception types" but `bot/engine/errors.py` defi
 
 **Fix:** Update doc to say 14 exception types, or add 3 more exception types to match the doc.
 
+**✅ FIXED** — `docs/architecture-design.md:53` updated: "17 exception types" → "14 exception types".
+
 ---
 
 ## C-COLORS-1 (LOW): `TEAL` color doesn't match UX palette
@@ -356,3 +370,5 @@ But `bot/colors.py` defines `TEAL = 0x00C9A7` which is a teal/cyan color. The ye
 **Impact:** Minor naming inconsistency. No runtime impact but confusing for developers.
 
 **Fix:** Add `YELLOW = AMBER` alias, or rename `TEAL` to match its usage.
+
+**✅ FIXED** — `bot/colors.py`: added `YELLOW = AMBER` alias.
