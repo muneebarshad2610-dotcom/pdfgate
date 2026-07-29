@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine, Column, String, Integer, Boolean, BigInteger, DateTime, func
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from bot.config import config
-
 Base = declarative_base()
 
 
@@ -46,17 +44,24 @@ class LeaderboardEntryModel(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
 
-engine = create_engine(str(config.database.url), echo=False)
-SessionLocal = sessionmaker(bind=engine)
+_engine_obj = None
+_maker = None
+
+
+def get_engine():
+    global _engine_obj
+    if _engine_obj is None:
+        from bot.config import config
+        _engine_obj = create_engine(str(config.database.url), echo=False)
+    return _engine_obj
+
+
+def SessionLocal():
+    global _maker
+    if _maker is None:
+        _maker = sessionmaker(bind=get_engine())
+    return _maker()
 
 
 async def init_db():
-    Base.metadata.create_all(engine)
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    Base.metadata.create_all(get_engine())
