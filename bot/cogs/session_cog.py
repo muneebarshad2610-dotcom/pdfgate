@@ -10,6 +10,7 @@ from bot.errors import (
 )
 from bot.games.majority_rules import MajorityRules
 from bot.games.one_night_mafia import OneNightMafia
+from bot.games.trivia import TriviaChallenge
 
 session_manager = SessionManager()
 
@@ -170,6 +171,8 @@ class SessionCog(commands.Cog):
             return MajorityRules(session)
         elif session.game_type == "one_night_mafia":
             return OneNightMafia(session)
+        elif session.game_type == "trivia":
+            return TriviaChallenge(session)
         return None
 
 

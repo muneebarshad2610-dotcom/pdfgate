@@ -56,6 +56,13 @@ class GameCog(commands.GroupCog, group_name="play"):
         if session:
             session.game_type = "one_night_mafia"
 
+    @app_commands.command(name="trivia", description="Play Trivia Challenge")
+    @app_commands.describe(local="Play locally with no leaderboard tracking")
+    async def trivia(self, interaction: discord.Interaction, local: bool = False):
+        session = await self._setup_game(interaction, "trivia", local)
+        if session:
+            session.game_type = "trivia"
+
 
 async def setup(bot):
     await bot.add_cog(GameCog(bot))
