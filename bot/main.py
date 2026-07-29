@@ -58,14 +58,25 @@ class HouseOfGamesBot(commands.Bot):
         log.info("Connected to %d guilds", len(self.guilds))
 
 
-async def health_check(request):
-    return web.json_response({"status": "ok"}, status=200)
+LANDING_PAGE: str | None = None
+
+
+async def serve_landing(request):
+    global LANDING_PAGE
+    if LANDING_PAGE is None:
+        path = os.path.join(os.path.dirname(__file__), "..", "index.html")
+        try:
+            with open(path, encoding="utf-8") as f:
+                LANDING_PAGE = f.read()
+        except FileNotFoundError:
+            return web.json_response({"status": "ok", "landing": "not found"}, status=200)
+    return web.Response(text=LANDING_PAGE, content_type="text/html")
 
 
 async def start_health_server():
     app = web.Application()
-    app.router.add_get("/", health_check)
-    app.router.add_get("/health", health_check)
+    app.router.add_get("/", serve_landing)
+    app.router.add_get("/health", serve_landing)
 
     port = int(os.getenv("PORT", "8080"))
     runner = web.AppRunner(app)
