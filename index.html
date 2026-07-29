@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>House of Games — Discord Bot</title>
+  <meta name="description" content="Competitive multiplayer game shows for your Discord server. Four shows. Ten players. One winner.">
+
+  <meta property="og:title" content="House of Games — Discord Bot">
+  <meta property="og:description" content="Competitive multiplayer game shows for your Discord. Four shows. Ten players. One winner.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#FFD84D">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== RESET ===== */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0A0B12;color:#F7F3EB;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
+    ul{list-style:none}
+
+    /* ===== KEYBOARD FOCUS ===== */
+    :focus-visible{outline:2px solid #FFD84D;outline-offset:3px;border-radius:4px}
+
+    /* ===== CONTAINER ===== */
+    .container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+
+    /* ===== HEADER ===== */
+    .header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 0;background:rgba(10,11,18,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid rgba(247,243,235,.06)}
+    .header .container{display:flex;align-items:center;justify-content:space-between}
+    .header-logo{font-family:Barlow,sans-serif;font-weight:700;font-size:1.125rem;letter-spacing:.15em;color:#F7F3EB}
+    .header-logo span{color:#FFD84D}
+    .header-cta{font-size:.8125rem;font-weight:600;padding:.55rem 1.25rem;border-radius:100px;background:#FFD84D;color:#0A0B12;transition:opacity .25s,transform .25s}
+    .header-cta:hover{opacity:.85;transform:translateY(-1px)}
+    @media(max-width:480px){.header-cta{padding:.45rem 1rem;font-size:.75rem}}
+
+    /* ===== BUTTON ===== */
+    .btn{display:inline-block;font-family:Inter,sans-serif;font-weight:600;border:none;cursor:pointer;transition:opacity .25s,transform .25s,box-shadow .25s;text-align:center}
+    .btn:hover{opacity:.85;transform:translateY(-2px)}
+    .btn--primary{background:#FFD84D;color:#0A0B12;padding:.85rem 2.25rem;border-radius:100px;font-size:1rem;box-shadow:0 0 30px rgba(255,216,77,.15)}
+    .btn--primary:hover{box-shadow:0 0 50px rgba(255,216,77,.25)}
+    .btn--large{padding:1.1rem 3rem;font-size:1.125rem}
+
+    /* ===== HERO ===== */
+    .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:7rem 0 5rem}
+    .hero::before{content:'';position:absolute;width:70vmax;height:70vmax;top:20%;left:-10%;background:radial-gradient(circle,rgba(255,216,77,.07) 0%,transparent 65%);animation:orbit 24s ease-in-out infinite;pointer-events:none}
+    @media(prefers-reduced-motion:reduce){.hero::before,.hero::after,.game-card::after,.orb{animation:none!important}}
+    .hero::after{content:'';position:absolute;width:55vmax;height:55vmax;bottom:10%;right:-5%;background:radial-gradient(circle,rgba(0,201,167,.05) 0%,transparent 65%);animation:orbit 28s ease-in-out infinite reverse;pointer-events:none}
+    @keyframes orbit{0%,100%{transform:translate(0,0)}33%{transform:translate(8%,-10%)}66%{transform:translate(-6%,6%)}}
+    .hero .container{position:relative;z-index:1;width:100%;text-align:center}
+    .hero-eyebrow{display:inline-block;font-family:Barlow,sans-serif;font-weight:600;font-size:.8125rem;letter-spacing:.2em;text-transform:uppercase;color:#00C9A7;margin-bottom:1.5rem;padding:.35rem 1rem;border:1px solid rgba(0,201,167,.25);border-radius:100px}
+    .hero-title{font-family:Barlow,sans-serif;font-weight:900;font-size:clamp(2.75rem,7vw,5.5rem);line-height:1;letter-spacing:-.02em;text-transform:uppercase;margin-bottom:1.5rem;color:#F7F3EB}
+    .hero-title span{color:#FFD84D}
+    .hero-sub{font-size:clamp(1rem,2vw,1.25rem);color:rgba(247,243,235,.65);max-width:580px;margin:0 auto 2.25rem;line-height:1.7}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-bottom:3rem}
+    .hero-stats{display:flex;flex-wrap:wrap;gap:1.5rem 2.5rem;justify-content:center;font-size:.85rem;color:rgba(247,243,235,.5);letter-spacing:.05em}
+    .hero-stats span{color:#FFD84D;font-weight:700}
+    @media(max-width:600px){.hero{padding:6rem 0 3rem;min-height:auto}.hero-title{font-size:clamp(2rem,10vw,3rem)}}
+
+    /* ===== SECTIONS ===== */
+    .section{padding:6rem 0}
+    .section-label{font-family:Barlow,sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;color:#00C9A7;margin-bottom:.75rem}
+    .section-title{font-family:Barlow,sans-serif;font-weight:700;font-size:clamp(1.5rem,3.5vw,2.75rem);line-height:1.1;letter-spacing:-.01em;margin-bottom:1rem}
+    .section-desc{color:rgba(247,243,235,.55);max-width:560px;font-size:1.05rem;margin-bottom:3rem}
+    .section--dark{background:#0E0F18}
+
+    /* ===== GAMES GRID ===== */
+    .games-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+    @media(max-width:700px){.games-grid{grid-template-columns:1fr}}
+
+    .game-card{position:relative;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:2rem 1.75rem;overflow:hidden;transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .35s;cursor:default}
+    .game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent,#FFD84D);opacity:.6;transition:opacity .35s}
+    .game-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.12)}
+    .game-card:hover::before{opacity:1}
+    .game-card-count{font-family:Barlow,sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.15em;color:rgba(247,243,235,.3);margin-bottom:.75rem}
+    .game-card-name{font-family:Barlow,sans-serif;font-weight:700;font-size:1.35rem;margin-bottom:.5rem;letter-spacing:-.01em}
+    .game-card-desc{font-size:.9rem;color:rgba(247,243,235,.5);line-height:1.6;margin-bottom:1.25rem}
+    .game-card-tag{display:inline-block;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.25rem .75rem;border-radius:100px;border:1px solid var(--card-accent,#FFD84D);color:var(--card-accent,#FFD84D);opacity:.7}
+
+    .game-card:nth-child(1){--card-accent:#4A7BFF}
+    .game-card:nth-child(2){--card-accent:#FF5E57}
+    .game-card:nth-child(3){--card-accent:#FFD84D}
+    .game-card:nth-child(4){--card-accent:#00C9A7}
+
+    /* ===== STEPS ===== */
+    .steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;position:relative}
+    .steps::before{content:'';position:absolute;top:2.5rem;left:calc(16.66% + .5rem);right:calc(16.66% + .5rem);height:1px;background:linear-gradient(90deg,transparent,rgba(255,216,77,.3) 15%,rgba(255,216,77,.3) 85%,transparent)}
+    @media(max-width:700px){.steps{grid-template-columns:1fr;gap:2rem}.steps::before{display:none}}
+    .step{text-align:center;position:relative}
+    .step-num{width:3.5rem;height:3.5rem;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:Barlow,sans-serif;font-weight:700;font-size:1.25rem;background:rgba(255,216,77,.08);border:1px solid rgba(255,216,77,.15);color:#FFD84D}
+    .step-title{font-family:Barlow,sans-serif;font-weight:600;font-size:1.15rem;margin-bottom:.5rem}
+    .step-desc{font-size:.9rem;color:rgba(247,243,235,.5);line-height:1.6;max-width:300px;margin:0 auto}
+    @media(max-width:700px){.step-desc{max-width:100%}}
+
+    /* ===== MODES ===== */
+    .modes-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem}
+    @media(max-width:700px){.modes-grid{grid-template-columns:1fr}}
+    .mode-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:2rem 1.75rem;transition:border-color .35s,transform .35s cubic-bezier(.34,1.56,.64,1)}
+    .mode-card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-3px)}
+    .mode-icon{font-size:1.75rem;margin-bottom:1rem;display:block}
+    .mode-name{font-family:Barlow,sans-serif;font-weight:700;font-size:1.15rem;margin-bottom:.5rem}
+    .mode-desc{font-size:.875rem;color:rgba(247,243,235,.5);line-height:1.6}
+
+    /* ===== STATS ===== */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+    @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr);gap:2rem}}
+    .stat{text-align:center}
+    .stat-num{font-family:Barlow,sans-serif;font-weight:900;font-size:clamp(2.25rem,4vw,3.5rem);line-height:1;letter-spacing:-.03em;color:#FFD84D;margin-bottom:.35rem}
+    .stat-label{font-size:.825rem;color:rgba(247,243,235,.45);text-transform:uppercase;letter-spacing:.1em}
+
+    /* ===== FINAL CTA ===== */
+    .cta-final{text-align:center;padding:6rem 0}
+    .cta-final .section-title{font-size:clamp(1.75rem,4vw,3.25rem)}
+    .cta-final .section-desc{margin-left:auto;margin-right:auto}
+
+    /* ===== FOOTER ===== */
+    .footer{border-top:1px solid rgba(255,255,255,.06);padding:2.5rem 0}
+    .footer .container{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+    .footer-logo{font-family:Barlow,sans-serif;font-weight:700;font-size:.875rem;letter-spacing:.12em;color:rgba(247,243,235,.4)}
+    .footer-links{display:flex;gap:1.5rem;font-size:.8rem}
+    .footer-links a{color:rgba(247,243,235,.35);transition:color .25s}
+    .footer-links a:hover{color:rgba(247,243,235,.7)}
+    @media(max-width:480px){.footer .container{flex-direction:column;text-align:center}}
+
+    /* ===== REVEAL ANIMATION ===== */
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+    /* ===== SCROLL MARGIN ===== */
+    #games,#modes,#how{margin-top:-5rem;padding-top:5rem}
+
+  </style>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" role="banner">
+    <div class="container">
+      <span class="header-logo">HOUSE<span>.</span></span>
+      <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="header-cta" target="_blank" rel="noopener">Add to Discord</a>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container">
+      <p class="hero-eyebrow">Now on Discord</p>
+      <h1 class="hero-title">The House<br>Has a Game<span>.</span></h1>
+      <p class="hero-sub">Competitive multiplayer game shows for your Discord server. Gather ten players, pick a show, and prove who&rsquo;s the best.</p>
+      <div class="hero-actions">
+        <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn btn--primary btn--large" target="_blank" rel="noopener">Add to Discord</a>
+      </div>
+      <div class="hero-stats">
+        <span>4</span> game shows &middot; <span>256+</span> questions &middot; <span>3</span> game modes
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GAMES ===== -->
+  <section class="section" id="games">
+    <div class="container">
+      <p class="section-label reveal">The Lineup</p>
+      <h2 class="section-title reveal">Four Shows. One House.</h2>
+      <p class="section-desc reveal">Each game tests a different kind of clever. None of them play the same way twice.</p>
+      <div class="games-grid">
+
+        <article class="game-card reveal">
+          <p class="game-card-count">01</p>
+          <h3 class="game-card-name">Majority Rules</h3>
+          <p class="game-card-desc">Ten rounds of predicting what everyone else will pick. Score when you vote with the crowd. Your gut vs. the table.</p>
+          <span class="game-card-tag">10 Players</span>
+        </article>
+
+        <article class="game-card reveal">
+          <p class="game-card-count">02</p>
+          <h3 class="game-card-name">One Night Mafia</h3>
+          <p class="game-card-desc">A single round of high-stakes deduction. Someone at the table is the imposter. Find them before dawn breaks.</p>
+          <span class="game-card-tag">10 Players</span>
+        </article>
+
+        <article class="game-card reveal">
+          <p class="game-card-count">03</p>
+          <h3 class="game-card-name">Trivia Challenge</h3>
+          <p class="game-card-desc">Two hundred and thirty-six questions across seven categories. Bottom two are eliminated every round. Last one standing wins.</p>
+          <span class="game-card-tag">236 Questions</span>
+        </article>
+
+        <article class="game-card reveal">
+          <p class="game-card-count">04</p>
+          <h3 class="game-card-name">The Trust Game</h3>
+          <p class="game-card-desc">Everyone sees your card except you. Ask shrewd questions, decide who to trust, and guess your hand before time runs out.</p>
+          <span class="game-card-tag">8 Rounds</span>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="section section--dark" id="how">
+    <div class="container">
+      <p class="section-label reveal">How to Play</p>
+      <h2 class="section-title reveal">Three Moves and You&rsquo;re In</h2>
+      <p class="section-desc reveal">Getting a season started takes about thirty seconds. The hard part is lasting to the final round.</p>
+      <div class="steps">
+
+        <div class="step reveal">
+          <div class="step-num">1</div>
+          <h3 class="step-title">Add the Bot</h3>
+          <p class="step-desc">Invite House of Games to your server with one click. No configuration, no channels to set up.</p>
+        </div>
+
+        <div class="step reveal">
+          <div class="step-num">2</div>
+          <h3 class="step-title">Gather Your Crew</h3>
+          <p class="step-desc">Players use <code>/join</code> to enter the lobby. The host starts the game once ten players are in.</p>
+        </div>
+
+        <div class="step reveal">
+          <div class="step-num">3</div>
+          <h3 class="step-title">Play the Season</h3>
+          <p class="step-desc">Campaign mode eliminates players round by round. Standalone and local modes let you play without the stakes.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MODES ===== -->
+  <section class="section" id="modes">
+    <div class="container">
+      <p class="section-label reveal">Your Season, Your Way</p>
+      <h2 class="section-title reveal">Three Ways to Play</h2>
+      <p class="section-desc reveal">Whether you want a full tournament or a quick warm-up, there&rsquo;s a mode for it.</p>
+      <div class="modes-grid">
+
+        <div class="mode-card reveal">
+          <span class="mode-icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 4L18.5 11H26L20 15.5L22.5 23L16 18.5L9.5 23L12 15.5L6 11H13.5L16 4Z" fill="#FFD84D" opacity=".9"/>
+            </svg>
+          </span>
+          <h3 class="mode-name">Campaign</h3>
+          <p class="mode-desc">A full season with eliminations. Players are voted out round by round until one champion remains. Persistent leaderboards track every victory across your server.</p>
+        </div>
+
+        <div class="mode-card reveal">
+          <span class="mode-icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 6L26 16L8 26V6Z" fill="#00C9A7" opacity=".9"/>
+            </svg>
+          </span>
+          <h3 class="mode-name">Standalone</h3>
+          <p class="mode-desc">Jump into any game without commitment. Scores reset each session and there&rsquo;re no eliminations. Perfect for casual rounds or introducing new players.</p>
+        </div>
+
+        <div class="mode-card reveal">
+          <span class="mode-icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="16" cy="11" r="4" stroke="#FF5E57" stroke-width="2" opacity=".9"/>
+              <path d="M8 28C8 23 11 19 16 19C21 19 24 23 24 28" stroke="#FF5E57" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            </svg>
+          </span>
+          <h3 class="mode-name">Local</h3>
+          <p class="mode-desc">Practice mode with no tracking. Learn the rules, test strategies, play for fun. Nothing gets recorded — pure sandbox.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STATS ===== -->
+  <section class="section section--dark">
+    <div class="container">
+      <p class="section-label reveal">By the Numbers</p>
+      <div class="stats-grid">
+        <div class="stat reveal"><div class="stat-num">4</div><div class="stat-label">Game Shows</div></div>
+        <div class="stat reveal"><div class="stat-num">256+</div><div class="stat-label">Questions</div></div>
+        <div class="stat reveal"><div class="stat-num">10</div><div class="stat-label">Per Session</div></div>
+        <div class="stat reveal"><div class="stat-num">3</div><div class="stat-label">Game Modes</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FINAL CTA ===== -->
+  <section class="cta-final">
+    <div class="container">
+      <h2 class="section-title reveal">Your Table Is Waiting</h2>
+      <p class="section-desc reveal">Add House of Games to your server. The first season starts the moment you do.</p>
+      <div class="reveal">
+        <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn btn--primary btn--large" target="_blank" rel="noopener">Add to Discord</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <span class="footer-logo">HOUSE OF GAMES</span>
+      <div class="footer-links">
+        <a href="https://discord.com/oauth2/authorize?client_id=1530305796892524705&permissions=8&integration_type=0&scope=bot+applications.commands" target="_blank" rel="noopener">Invite</a>
+        <a href="#">GitHub</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var reveals = document.querySelectorAll('.reveal');
+      if (!reveals.length) return;
+
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        reveals.forEach(function(el) { observer.observe(el); });
+      } else {
+        reveals.forEach(function(el) { el.classList.add('visible'); });
+      }
+    })();
+  </script>
+
+</body>
+</html>
