@@ -228,3 +228,131 @@ the game type information is lost.
 
 Shows `/create [mode]` but the command now requires `game` parameter. Should be
 `/create [mode] [game]`.
+
+---
+
+## C-GAME-2 (CRITICAL): `/play ask` crashes with `discord.Member` in DMs
+
+**File:** `bot/cogs/game_cog.py:82`
+
+```python
+async def ask(self, interaction, target: discord.Member, question: str, tt: bool = False):
+```
+
+`discord.Member` requires a guild context to resolve. When used in a DM (which the command requires at line 86), discord.py **cannot resolve `discord.Member`** because there is no guild. The command raises an exception before the handler ever runs.
+
+**Impact:** The `/play ask` command is completely broken. Any attempt to use it in DMs crashes immediately.
+
+**Fix:** Change `target: discord.Member` to `target: str` (accept display name or ID) or `target: discord.User` (resolves globally).
+
+---
+
+## C-GAME-3 (CRITICAL): `/play ask` guild_id is `None` in DMs
+
+**File:** `bot/cogs/game_cog.py:89`
+
+```python
+session = session_manager.get_player_session(interaction.guild_id, interaction.user.id)
+```
+
+`interaction.guild_id` is `None` when the command is used in DMs. `get_player_session` checks `session.guild_id == guild_id` — since all sessions have a real guild ID, `None == actual_guild_id` is always `False`. The command **never** finds the player's session and always responds "You're not in an active game."
+
+**Fix:** Add `get_player_session_by_user(discord_id)` to `SessionManager` that searches across all guilds, and use it in DM-based commands.
+
+---
+
+## C-ENGINE-10 (MEDIUM): `end_game()` called multiple times per session
+
+**File:** `bot/engine/base.py:41`, `bot/games/trivia.py:40`, `bot/games/trust_game.py:41`, `bot/cogs/session_cog.py:138`
+
+`end_game()` is called at multiple points for every game:
+1. `BaseGame.run()` calls `self.session.end_game()` after `on_end()` returns
+2. `TriviaChallenge.run()` and `TrustGame.run()` (which override `BaseGame.run()`) call `self.session.end_game()` themselves
+3. `SessionCog.start()` calls `session_manager.end_session()` in the `finally` block, which calls `session.end_game()` again
+
+**Impact:** For MajorityRules and OneNightMafia: 2 calls. For Trivia and Trust: 3 calls. `end_game()` sets `status = "completed"` and cancels timers — both are idempotent, so the double/triple calls are harmless but indicate design confusion.
+
+**Fix:** Remove `end_game()` calls from individual games' `run()` methods and `BaseGame.run()`. Let `SessionCog.start()`'s `finally` block be the sole caller.
+
+---
+
+## C-ENGINE-11 (MEDIUM): Dev guild auto-sync has no error handling
+
+**File:** `bot/main.py:38-42`
+
+```python
+DEV_GUILD_ID = 1522345099181297704
+guild = discord.Object(id=DEV_GUILD_ID)
+self.tree.clear_commands(guild=guild)
+self.tree.copy_global_to(guild=guild)
+await self.tree.sync(guild=guild)
+```
+
+If any of these calls fail (rate limited, Discord API error, invalid guild ID), the exception propagates and crashes `setup_hook`. The bot may still start but with stale or no commands synced.
+
+**Impact:** Stale slash commands cached in Discord; users see old command signatures.
+
+**Fix:** Wrap dev guild sync in try/except, log the error, and continue.
+
+---
+
+## C-MODES-1 (MEDIUM): All modes require exactly 10 players
+
+**File:** `bot/engine/modes.py`
+
+```python
+CAMPAIGN: {"min_players": 10, "max_players": 10, ...}
+STANDALONE: {"min_players": 10, "max_players": 10, ...}
+LOCAL: {"min_players": 10, "max_players": 10, ...}
+```
+
+All three modes mandate exactly 10 players. Standalone and Local modes are documented as flexible "play any game" modes, but the player limit prevents smaller groups from using them.
+
+**Impact:** Cannot play with fewer than 10 players even in Local mode. This contradicts the docs which describe Local as "ideal for practice, private groups, or casual play."
+
+**Fix:** Reduce min_players for STANDALONE and LOCAL to 3 or 4. Ensure all 4 games handle <10 players gracefully.
+
+---
+
+## C-CONFIG-1 (LOW): `config.game.min_players`/`max_players` are unused
+
+**File:** `bot/config.py`
+
+```python
+"game": {"min_players": 10, "max_players": 10}
+```
+
+These values are defined in `bot/config.py` but **never read by any code**. The mode configs in `bot/engine/modes.py` are used instead.
+
+**Fix:** Either remove from `config.py` or document that they exist as overrides. Currently dead config.
+
+---
+
+## C-ENGINE-12 (LOW): Exception hierarchy mismatch — docs claim 17 types, code has 14
+
+**File:** `docs/architecture-design.md:53`, `bot/engine/errors.py`
+
+The architecture doc claims "17 exception types" but `bot/engine/errors.py` defines only 14:
+- `HouseOfGamesError`, `SessionFullError`, `SessionLockedError`, `PlayerNotInSessionError`,
+  `NotEnoughPlayersError`, `NotSessionHostError`, `GameAlreadyStartedError`, `InvalidGameTypeError`,
+  `InvalidPhaseError`, `PlayerAlreadyVotedError`, `RoleNotFoundError`, `DeckEmptyError`,
+  `QuestionNotFoundError`, `TimerExpiredError`
+
+**Impact:** Doc/code inconsistency. No runtime impact.
+
+**Fix:** Update doc to say 14 exception types, or add 3 more exception types to match the doc.
+
+---
+
+## C-COLORS-1 (LOW): `TEAL` color doesn't match UX palette
+
+**File:** `bot/colors.py`, `docs/ux.md:16`
+
+The UX palette in `docs/ux.md` describes:
+| Time-sensitive | Yellow (#FEE75C) | Warning, last 10 seconds |
+
+But `bot/colors.py` defines `TEAL = 0x00C9A7` which is a teal/cyan color. The yellow `0xFEE75C` is defined as `AMBER` (separate from TEAL). The naming is confusing — "TEAL" suggests a blue-green color, but it's used for time-sensitive warnings in `dev_cog.py:29` where `TEAL` is the embed color.
+
+**Impact:** Minor naming inconsistency. No runtime impact but confusing for developers.
+
+**Fix:** Add `YELLOW = AMBER` alias, or rename `TEAL` to match its usage.
