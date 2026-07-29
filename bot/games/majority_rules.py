@@ -11,11 +11,19 @@ from bot.colors import BLUE_PRIMARY, GREEN, RED, GREY
 from bot.config import config
 
 
+def _get_name(players, pid):
+    p = players.get(str(pid))
+    return p.display_name if p else "Unknown"
+
+
 def load_questions():
     path = QUESTIONS_DIR / "majority.json"
     if path.exists():
-        with open(path) as f:
-            return json.load(f)
+        try:
+            with open(path) as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return []
     return []
 
 
@@ -51,7 +59,7 @@ class MajorityRules(BaseGame):
                 lines = []
                 for idx, table in enumerate(self._tables):
                     names = ", ".join(
-                        self.session.state.players[str(pid)].display_name
+                        _get_name(self.session.state.players, pid)
                         for pid in table
                     )
                     lines.append(f"**Table {idx + 1}:** {names}")
@@ -93,7 +101,7 @@ class MajorityRules(BaseGame):
                                 pass
 
             timeout = 30
-            await self.session.timer.start(f"mr_round_{round_number}_t{table_idx}", timeout, lambda: None)
+            self.session.timer.start(f"mr_round_{round_number}_t{table_idx}", timeout)
 
             countdown_msg = None
             for remaining in range(timeout, 0, -1):
@@ -119,7 +127,7 @@ class MajorityRules(BaseGame):
             }
 
             scorers = [
-                self.session.state.players[str(pid)].display_name
+                _get_name(self.session.state.players, pid)
                 for pid in table
                 if table_results.get(pid) == majority
             ]
@@ -145,7 +153,7 @@ class MajorityRules(BaseGame):
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
         if channel:
             standings = "\n".join(
-                f"{i + 1}. {self.session.state.players[str(pid)].display_name} \u2014 **{score} pts**"
+                f"{i + 1}. {_get_name(self.session.state.players, pid)} \u2014 **{score} pts**"
                 for i, (pid, score) in enumerate(ranked)
             )
             await channel.send(
@@ -174,7 +182,7 @@ class MajorityRules(BaseGame):
 
                 if self.session.bot and channel:
                     elim_names = ", ".join(
-                        self.session.state.players[str(pid)].display_name
+                        _get_name(self.session.state.players, pid)
                         for pid, _ in eliminated
                     )
                     await channel.send(

@@ -41,16 +41,17 @@ class SessionCog(commands.Cog):
         app_commands.Choice(name="The Trust Game", value="trust"),
     ])
     async def create(self, interaction: discord.Interaction, mode: str, game: str):
+        await interaction.response.defer()
         existing = session_manager.get_session_by_channel(interaction.channel_id)
         if existing:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "A session is already active in this channel.", ephemeral=True
             )
             return
 
         game_mode = mode_from_string(mode)
         if game_mode is None:
-            await interaction.response.send_message("Invalid mode. Choose campaign, standalone, or local.", ephemeral=True)
+            await interaction.followup.send("Invalid mode. Choose campaign, standalone, or local.", ephemeral=True)
             return
 
         session = session_manager.create_session(
@@ -69,13 +70,14 @@ class SessionCog(commands.Cog):
         embed.add_field(name="Session ID", value=session.id, inline=False)
         embed.add_field(name="Next Steps", value="Use `/join` to enter the game\nHost uses `/start` to begin", inline=False)
 
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="join", description="Join an active game session")
     async def join(self, interaction: discord.Interaction):
+        await interaction.response.defer()
         session = session_manager.get_session_by_channel(interaction.channel_id)
         if session is None:
-            await interaction.response.send_message("No active session in this channel.", ephemeral=True)
+            await interaction.followup.send("No active session in this channel.", ephemeral=True)
             return
 
         try:
@@ -87,11 +89,11 @@ class SessionCog(commands.Cog):
             )
             if session.player_count >= session.min_players:
                 embed.add_field(name="Ready to Start", value="The host can now use `/start` to begin!", inline=False)
-            await interaction.response.send_message(embed=embed)
+            await interaction.followup.send(embed=embed)
         except SessionFullError:
-            await interaction.response.send_message(f"Session is full (max {session.max_players} players).", ephemeral=True)
+            await interaction.followup.send(f"Session is full (max {session.max_players} players).", ephemeral=True)
         except SessionLockedError:
-            await interaction.response.send_message("Session has already started.", ephemeral=True)
+            await interaction.followup.send("Session has already started.", ephemeral=True)
 
     @app_commands.command(name="leave", description="Leave the current game session")
     async def leave(self, interaction: discord.Interaction):
@@ -117,34 +119,38 @@ class SessionCog(commands.Cog):
 
         try:
             session.start_game(interaction.user.id)
-            session.bot = self.bot
-
-            embed = discord.Embed(
-                title="Game Started!",
-                description=f"The game has begun in **{session.mode.value.title()}** mode with {session.player_count} players!",
-                color=GREEN,
-            )
-            await interaction.response.send_message(embed=embed)
-
-            game = self._create_game(session)
-            if game:
-                session.game = game
-                try:
-                    await game.run()
-                except Exception:
-                    log.exception("Game %s crashed in channel %s", session.game_type, session.channel_id)
-                    embed = discord.Embed(
-                        title="Game Crashed",
-                        description="An error occurred while running the game. The session has been ended.",
-                        color=RED,
-                    )
-                    await interaction.channel.send(embed=embed)
-                finally:
-                    session_manager.end_session(session.id)
         except NotSessionHostError:
             await interaction.response.send_message("Only the host can start the game.", ephemeral=True)
+            return
         except NotEnoughPlayersError as e:
             await interaction.response.send_message(str(e), ephemeral=True)
+            return
+
+        await interaction.response.defer()
+        session.bot = self.bot
+
+        embed = discord.Embed(
+            title="Game Started!",
+            description=f"The game has begun in **{session.mode.value.title()}** mode with {session.player_count} players!",
+            color=GREEN,
+        )
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+        game = self._create_game(session)
+        if game:
+            session.game = game
+            try:
+                await game.run()
+            except Exception:
+                log.exception("Game %s crashed in channel %s", session.game_type, session.channel_id)
+                embed = discord.Embed(
+                    title="Game Crashed",
+                    description="An error occurred while running the game. The session has been ended.",
+                    color=RED,
+                )
+                await interaction.channel.send(embed=embed)
+            finally:
+                session_manager.end_session(session.id)
 
     @app_commands.command(name="end", description="End the current session (host only)")
     async def end(self, interaction: discord.Interaction):

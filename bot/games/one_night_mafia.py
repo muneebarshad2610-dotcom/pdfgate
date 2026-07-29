@@ -10,6 +10,16 @@ from bot.colors import BLUE_PRIMARY, GREEN, RED, GREY, AMBER
 from bot.config import config
 
 
+def _get_name(players, pid):
+    p = players.get(str(pid))
+    return p.display_name if p else "Unknown"
+
+
+def _is_alive(players, pid):
+    p = players.get(str(pid))
+    return p is not None and not p.eliminated
+
+
 class OneNightMafia(BaseGame):
 
     def __init__(self, session):
@@ -30,11 +40,15 @@ class OneNightMafia(BaseGame):
         player_ids = list(self.session.state.player_order)
         random.shuffle(player_ids)
 
+        needed = len(player_ids) + 3
+        if needed > len(deck):
+            raise ValueError(f"Need {needed} cards for {len(player_ids)} players + 3 center, but deck only has {len(deck)}")
+
         for i, pid in enumerate(player_ids):
             role = deck[i]
             self._player_roles[str(pid)] = role
 
-        self._center_cards = deck[len(player_ids):len(player_ids) + 3]
+        self._center_cards = deck[len(player_ids):needed]
 
         channel = self.session.bot.get_channel(self.session.channel_id) if self.session.bot else None
 
@@ -97,7 +111,7 @@ class OneNightMafia(BaseGame):
                 user = self.session.bot.get_user(pid) if self.session.bot else None
                 if user:
                     names = ", ".join(
-                        self.session.state.players.get(str(mid), {}).display_name
+                        _get_name(self.session.state.players, mid)
                         for mid in mafia_ids if mid != pid
                     )
                     try:
@@ -119,7 +133,7 @@ class OneNightMafia(BaseGame):
                 user = self.session.bot.get_user(pid) if self.session.bot else None
                 if user:
                     names = ", ".join(
-                        self.session.state.players.get(str(mid), {}).display_name
+                        _get_name(self.session.state.players, mid)
                         for mid in mafia_ids
                     )
                     try:
@@ -142,7 +156,7 @@ class OneNightMafia(BaseGame):
                 user = self.session.bot.get_user(pid) if self.session.bot else None
                 if user and other_masons:
                     names = ", ".join(
-                        self.session.state.players.get(str(mid), {}).display_name
+                        _get_name(self.session.state.players, mid)
                         for mid in other_masons
                     )
                     try:
@@ -194,7 +208,7 @@ class OneNightMafia(BaseGame):
                 try:
                     embed = discord.Embed(
                         title="Robbery Complete",
-                        description=f"You swapped roles with {self.session.state.players.get(str(target_id), {}).display_name}. You do not know what role you received.",
+                        description=f"You swapped roles with {_get_name(self.session.state.players, target_id)}. You do not know what role you received.",
                         color=AMBER,
                     )
                     await user.send(embed=embed)
@@ -216,7 +230,7 @@ class OneNightMafia(BaseGame):
                     try:
                         embed = discord.Embed(
                             title="Troublemaker",
-                            description=f"You swapped the cards of {self.session.state.players.get(str(t1), {}).display_name} and {self.session.state.players.get(str(t2), {}).display_name}.",
+                            description=f"You swapped the cards of {_get_name(self.session.state.players, t1)} and {_get_name(self.session.state.players, t2)}.",
                             color=AMBER,
                         )
                         await user.send(embed=embed)
@@ -292,7 +306,7 @@ class OneNightMafia(BaseGame):
                     targets = {
                         p: self.session.state.players.get(str(p))
                         for p in self.session.state.player_order
-                        if p != pid and not self.session.state.players.get(str(p), {}).eliminated
+                        if p != pid and _is_alive(self.session.state.players, p)
                     }
                     embed = discord.Embed(
                         title="Vote Now",
@@ -304,7 +318,7 @@ class OneNightMafia(BaseGame):
                     pass
 
         timeout = 60
-        await self.session.timer.start(f"mafia_vote", timeout, lambda: None)
+        self.session.timer.start(f"mafia_vote", timeout)
         countdown_msg = None
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":
@@ -346,14 +360,14 @@ class OneNightMafia(BaseGame):
         }
 
         roles_reveal = "\n".join(
-            f"{self.session.state.players.get(str(pid), {}).display_name}: **{role}**"
+            f"{_get_name(self.session.state.players, pid)}: **{role}**"
             for pid, role in player_role_names.items()
         )
 
         center_reveal = ", ".join(c["name"] for c in self._center_cards)
 
         if voted_out is not None:
-            voted_name = self.session.state.players.get(str(voted_out), {}).display_name
+            voted_name = _get_name(self.session.state.players, voted_out)
         else:
             voted_name = "No one (tie)"
 
@@ -467,6 +481,6 @@ def get_team_color(team):
 def format_vote_tally(vote_counts, players):
     lines = []
     for target, count in sorted(vote_counts.items(), key=lambda x: -x[1]):
-        name = players.get(str(target), {}).display_name if target else "Unknown"
+        name = _get_name(players, target) if target else "Unknown"
         lines.append(f"{name}: **{count}** vote{'s' if count != 1 else ''}")
     return "\n".join(lines) if lines else "No votes cast"

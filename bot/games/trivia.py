@@ -14,8 +14,11 @@ from bot.config import config
 def load_trivia_questions():
     path = QUESTIONS_DIR / "trivia.json"
     if path.exists():
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return []
     return []
 
 
@@ -61,6 +64,8 @@ class TriviaChallenge(BaseGame):
         text = question["text"]
         options = question["options"]
         correct_idx = question["answer"]
+        if correct_idx < 0 or correct_idx >= len(options):
+            correct_idx = 0
         correct_text = options[correct_idx]
 
         remaining = self.active_players
@@ -101,7 +106,7 @@ class TriviaChallenge(BaseGame):
 
         timeout = 20
         if self.session.timer:
-            await self.session.timer.start(f"trivia_round_{round_number}", timeout, lambda: None)
+            self.session.timer.start(f"trivia_round_{round_number}", timeout)
         countdown_msg = None
         for remaining_time in range(timeout, 0, -1):
             if self.session.status != "in_progress":
@@ -129,7 +134,11 @@ class TriviaChallenge(BaseGame):
                 self.session.score_player(pid, 1)
 
         correct_pids = [pid for pid, ans in self._round_answers.items() if ans == correct_idx]
-        correct_names = [self.session.state.players.get(str(pid), {}).display_name for pid in correct_pids]
+        correct_names = [
+            self.session.state.players.get(str(pid)).display_name
+            for pid in correct_pids
+            if self.session.state.players.get(str(pid))
+        ]
 
         if channel:
             embed = discord.Embed(

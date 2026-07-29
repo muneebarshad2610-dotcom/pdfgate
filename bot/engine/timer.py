@@ -10,7 +10,7 @@ class RoundTimer:
         self._tasks = {}
         self._remaining = {}
 
-    def start(self, timer_id: str, duration: int, callback):
+    def start(self, timer_id: str, duration: int, callback=None):
         self.cancel(timer_id)
         self._remaining[timer_id] = duration
 
@@ -20,7 +20,11 @@ class RoundTimer:
                     self._remaining[timer_id] = remaining
                     await asyncio.sleep(1)
                 self._remaining[timer_id] = 0
-                await callback()
+                if callback:
+                    if asyncio.iscoroutinefunction(callback):
+                        await callback()
+                    else:
+                        callback()
             except asyncio.CancelledError:
                 pass
             finally:

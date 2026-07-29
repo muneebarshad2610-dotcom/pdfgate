@@ -8,6 +8,16 @@ from bot.engine.modes import GameMode
 from bot.colors import BLUE_PRIMARY, GREEN, RED, GREY, AMBER
 from bot.config import config
 
+
+def _get_name(players, pid):
+    p = players.get(str(pid))
+    return p.display_name if p else "Unknown"
+
+
+def _is_alive(players, pid):
+    p = players.get(str(pid))
+    return p is not None and not p.eliminated
+
 SUITS = ["hearts", "diamonds", "clubs", "spades"]
 SUIT_SYMBOLS = {"hearts": "♥", "diamonds": "♦", "clubs": "♣", "spades": "♠"}
 RANKS = ["J", "Q", "K"]
@@ -86,7 +96,7 @@ class TrustGame(BaseGame):
         self._questions_remaining = {}
         self._used_truth_token = {}
 
-        active = [p for p in self.session.state.player_order if not self.session.state.players.get(str(p), {}).eliminated]
+        active = [p for p in self.session.state.player_order if _is_alive(self.session.state.players, p)]
 
         if channel:
             embed = discord.Embed(
@@ -106,7 +116,7 @@ class TrustGame(BaseGame):
 
         timeout = 90
         if self.session.timer:
-            await self.session.timer.start(f"trust_questions_{round_number}", timeout, lambda: None)
+            self.session.timer.start(f"trust_questions_{round_number}", timeout)
         countdown_msg = None
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":
@@ -215,6 +225,8 @@ class TrustGame(BaseGame):
         target_card = self._player_cards.get(str(target_pid), "???")
 
         user = self.session.bot.get_user(pid) if self.session.bot else None
+        target_name = target.display_name if target else "Unknown"
+        asker_name = asker.display_name if asker else "Unknown"
 
         if use_truth_token:
             self._used_truth_token[pid] = True
@@ -223,7 +235,7 @@ class TrustGame(BaseGame):
                 try:
                     embed = discord.Embed(
                         title="Truth Token Answer",
-                        description=f"Question about {target.display_name}'s card: **{answer}**",
+                        description=f"Question about {target_name}'s card: **{answer}**",
                         color=GREEN,
                     )
                     embed.add_field(name="Your Question", value=question_text, inline=False)
@@ -236,7 +248,7 @@ class TrustGame(BaseGame):
             if target_user:
                 try:
                     embed = discord.Embed(
-                        title=f"Question from {asker.display_name}",
+                        title=f"Question from {asker_name}",
                         description=question_text,
                         color=AMBER,
                     )
@@ -247,7 +259,7 @@ class TrustGame(BaseGame):
                 try:
                     embed = discord.Embed(
                         title="Question Sent",
-                        description=f"Your question has been sent to {target.display_name}. They may answer truthfully or lie.",
+                        description=f"Your question has been sent to {target_name}. They may answer truthfully or lie.",
                         color=GREEN,
                     )
                     embed.add_field(name="Your Question", value=question_text, inline=False)
@@ -310,7 +322,7 @@ class TrustGame(BaseGame):
 
         timeout = 30
         if self.session.timer:
-            await self.session.timer.start(f"trust_guess_{round_number}", timeout, lambda: None)
+            self.session.timer.start(f"trust_guess_{round_number}", timeout)
         countdown_msg = None
         for remaining in range(timeout, 0, -1):
             if self.session.status != "in_progress":

@@ -41,9 +41,10 @@ class HouseOfGamesBot(commands.Bot):
             self.tree.clear_commands(guild=guild)
             self.tree.copy_global_to(guild=guild)
             await self.tree.sync(guild=guild)
-            log.info("Dev guild synced successfully")
+            await self.tree.sync()
+            log.info("Commands synced to dev guild and globally")
         except Exception:
-            log.exception("Dev guild sync failed — commands may be stale")
+            log.exception("Command sync failed — slash commands may be stale or duplicated")
         log.info("Bot setup complete")
 
     async def _load_cogs(self):
