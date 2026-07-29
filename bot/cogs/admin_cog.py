@@ -34,6 +34,7 @@ class AdminCog(commands.Cog):
             if scope == "dev":
                 DEV_GUILD_ID = 1522345099181297704
                 guild = self.bot.get_guild(DEV_GUILD_ID) or await self.bot.fetch_guild(DEV_GUILD_ID)
+                self.bot.tree.clear_commands(guild=guild)
                 self.bot.tree.copy_global_to(guild=guild)
                 synced = await self.bot.tree.sync(guild=guild)
                 msg = f"Synced {len(synced)} commands to dev guild."

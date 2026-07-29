@@ -37,6 +37,7 @@ class HouseOfGamesBot(commands.Bot):
         await init_db()
         DEV_GUILD_ID = 1522345099181297704
         guild = discord.Object(id=DEV_GUILD_ID)
+        self.tree.clear_commands(guild=guild)
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
         log.info("Bot setup complete — cogs loaded, database initialized, dev guild synced")
