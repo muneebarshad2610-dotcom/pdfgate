@@ -1,0 +1,82 @@
+[
+  {
+    "text": "Which color do you think most players will pick?",
+    "options": ["Red", "Blue", "Green", "Yellow", "Purple", "Orange"]
+  },
+  {
+    "text": "Which food do you think most players would choose for a free meal?",
+    "options": ["Pizza", "Sushi", "Burgers", "Pasta", "Tacos", "Salad"]
+  },
+  {
+    "text": "Which animal do you think most players would want as a pet?",
+    "options": ["Dog", "Cat", "Rabbit", "Hamster", "Bird", "Fish"]
+  },
+  {
+    "text": "Which vacation destination do you think most players prefer?",
+    "options": ["Beach", "Mountains", "City", "Countryside", "Cruise", "Camping"]
+  },
+  {
+    "text": "Which season do you think most players enjoy most?",
+    "options": ["Spring", "Summer", "Autumn", "Winter"]
+  },
+  {
+    "text": "Which drink do you think most players would order at a cafe?",
+    "options": ["Coffee", "Tea", "Hot Chocolate", "Smoothie", "Soda", "Water"]
+  },
+  {
+    "text": "Which movie genre do you think most players prefer?",
+    "options": ["Comedy", "Action", "Drama", "Horror", "Sci-Fi", "Romance"]
+  },
+  {
+    "text": "Which hobby do you think most players enjoy?",
+    "options": ["Reading", "Gaming", "Sports", "Cooking", "Music", "Art"]
+  },
+  {
+    "text": "Which time of day do you think most players are most productive?",
+    "options": ["Morning", "Afternoon", "Evening", "Night"]
+  },
+  {
+    "text": "Which social media platform do you think most players use most?",
+    "options": ["YouTube", "Instagram", "TikTok", "Twitter/X", "Reddit", "Discord"]
+  },
+  {
+    "text": "Which superpower do you think most players would choose?",
+    "options": ["Flight", "Invisibility", "Teleportation", "Mind Reading", "Super Strength", "Time Travel"]
+  },
+  {
+    "text": "Which breakfast food do you think most players prefer?",
+    "options": ["Pancakes", "Cereal", "Eggs", "Toast", "Fruit", "Oatmeal"]
+  },
+  {
+    "text": "Which ice cream flavor do you think most players like best?",
+    "options": ["Chocolate", "Vanilla", "Strawberry", "Cookie Dough", "Mint Chip", "Caramel"]
+  },
+  {
+    "text": "Which mode of transport do you think most players prefer?",
+    "options": ["Car", "Train", "Bicycle", "Walking", "Plane", "Boat"]
+  },
+  {
+    "text": "Which board game do you think most players enjoy?",
+    "options": ["Monopoly", "Chess", "Catan", "Scrabble", "Clue", "Risk"]
+  },
+  {
+    "text": "Which weather do you think most players like most?",
+    "options": ["Sunny", "Rainy", "Snowy", "Cloudy", "Windy"]
+  },
+  {
+    "text": "Which decade do you think most players would time travel to?",
+    "options": ["1920s", "1950s", "1980s", "2000s", "Ancient Times", "Future"]
+  },
+  {
+    "text": "Which fruit do you think most players would pick as their favorite?",
+    "options": ["Apple", "Banana", "Mango", "Watermelon", "Grapes", "Orange"]
+  },
+  {
+    "text": "Which pet do you think most players would choose if size wasn't an issue?",
+    "options": ["Elephant", "Wolf", "Dragon", "Horse", "Tiger", "Bear"]
+  },
+  {
+    "text": "Which skill do you think most players would want to master instantly?",
+    "options": ["Cooking", "Playing Guitar", "Flying a Plane", "Speaking 10 Languages", "Martial Arts", "Programming"]
+  }
+]
